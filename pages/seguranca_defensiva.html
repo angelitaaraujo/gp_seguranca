@@ -517,7 +517,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         <span>👋</span> Nota da Professora
       </div>
       <p style="margin-bottom: 0;">
-        Olá, pessoal! Na aula passada vestimos as máscaras do Red Team: modelamos ameaças e exploramos brechas como os invasores de <em>La Casa de Papel</em> invadindo a mansão do Sinhozinho Malta. Foi divertido e revelador ver as fraquezas surgirem. Mas hoje trocamos de uniforme. Nós fomos contratados como a equipe de elite de <strong>Segurança Patrimonial e Tática</strong> para transformar aquela mesma casa num cofre intransponível. Preparem o café, leiam com atenção e façam anotações para o nosso projeto semestral!
+        Olá, pessoal! Na aula passada vestimos as máscaras do Red Team: modelamos ameaças e exploramos brechas como os invasores de <em>La Casa de Papel</em> invadindo a mansão do Sinhozinho Malta. Foi divertido e revelador ver as fraquezas surgirem. Mas hoje trocamos de uniforme. Nós fomos contratados como a equipe de elite de <strong>Segurança Patrimonial e Tática</strong> para transformar aquela mesma casa num cofre intransponível. Preparem o café, leiam com atenção e façam suas anotações!
       </p>
     </div>
 
@@ -559,7 +559,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         <div class="callout callout-def">
           <div class="callout-header">Definição Fundamental: O Ciclo Defensivo Contínuo</div>
           <p style="margin-bottom: 0;">
-            A defesa cibernética opera em um ciclo ininterrupto de 5 verbos: 
+            A defesa cibernética opera em um ciclo ininterrupto de 5 verbos: <br />
             <strong>Proteger</strong> (reduzir a superfície de exposição) &rarr; 
             <strong>Detectar</strong> (perceber anomalias e movimentações sutis) &rarr; 
             <strong>Responder</strong> (conter e expelir o intruso) &rarr; 
@@ -587,11 +587,11 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
 
         <p>Os pilares do mindset defensivo fundamentam-se em:</p>
         <ul>
-          <li><strong>Assumir o comprometimento (Assume Breach):</strong> Trabalhe arquitetando os sistemas com a premissa de que o adversário <em>já possui</em> uma credencial de acesso ou já colocou um pé dentro da rede corporativa. A pergunta nunca é "como impedir que alguém tente entrar?", mas sim "quando entrarem, o que encontrarão pela frente?".</li>
-          <li><strong>Detecção precoce (Mean Time to Detect - MTTD):</strong> Um ladrão que passa 200 dias invisível dentro de uma residência tem tempo para abrir o cofre com calma. Se ele for detectado nos primeiros 90 segundos ao pisar no gramado, o dano é nulo.</li>
-          <li><strong>Humildade técnica:</strong> Não existe software perfeito. Se há código, há complexidade; se há complexidade, existem caminhos não mapeados.</li>
-          <li><strong>Vigilância e telemetria:</strong> Se uma porta bateu no corredor e ninguém registrou o som, o evento não existe. Para a defesa, ausência de logs equivale a cegueira tática voluntária.</li>
-          <li><strong>Documentação e Runbooks:</strong> Sob estresse e crise real de intrusão, seres humanos cometem falhas cognitivas. Procedimentos operacionais padronizados salvam organizações.</li>
+          <li>- <strong>Assumir o comprometimento (Assume Breach):</strong> Trabalhe arquitetando os sistemas com a premissa de que o adversário <em>já possui</em> uma credencial de acesso ou já colocou um pé dentro da rede corporativa. A pergunta nunca é "como impedir que alguém tente entrar?", mas sim "quando entrarem, o que encontrarão pela frente?".</li>
+          <li>- <strong>Detecção precoce (Mean Time to Detect - MTTD):</strong> Um ladrão que passa 200 dias invisível dentro de uma residência tem tempo para abrir o cofre com calma. Se ele for detectado nos primeiros 90 segundos ao pisar no gramado, o dano é nulo.</li>
+          <li>- <strong>Humildade técnica:</strong> Não existe software perfeito. Se há código, há complexidade; se há complexidade, existem caminhos não mapeados.</li>
+          <li>- <strong>Vigilância e telemetria:</strong> Se uma porta bateu no corredor e ninguém registrou o som, o evento não existe. Para a defesa, ausência de logs equivale a cegueira tática voluntária.</li>
+          <li>- <strong>Documentação e Runbooks:</strong> Sob estresse e crise real de intrusão, seres humanos cometem falhas cognitivas. Procedimentos operacionais padronizados salvam organizações.</li>
         </ul>
       </section>
 
@@ -766,11 +766,11 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
           Em nosso projeto da disciplina, o <strong>Banco Seguro</strong> atende milhares de transações financeiras. Como cada função do NIST se traduz na prática do nosso sistema financeiro?
         </p>
         <ul>
-          <li><strong>Identificar:</strong> Inventário dinâmico de todos os microserviços de pagamento, chaves de API PIX cadastradas e catalogação de bases PostgreSQL.</li>
-          <li><strong>Proteger:</strong> Hardening dos containers Docker, implementação de WAF (Web Application Firewall) contra SQLi e exigência de MFA para qualquer operador de banco.</li>
-          <li><strong>Detectar:</strong> SIEM correlacionando logs do cluster Kubernetes com tentativas com falha de autenticação via endpoint <code>/api/v1/pix/transfer</code>.</li>
-          <li><strong>Responder:</strong> Runbook automatizado que bloqueia temporariamente a chave do cliente e pausa transferências PIX acima de R$ 50.000 se houver 3 logins geodistantes em 5 minutos.</li>
-          <li><strong>Recuperar:</strong> Disaster Recovery com snapshots imutáveis do RDS armazenados em região secundária da nuvem e análise forense dos pacotes capturados.</li>
+          <li>- <strong>Identificar:</strong> Inventário dinâmico de todos os microserviços de pagamento, chaves de API PIX cadastradas e catalogação de bases PostgreSQL.</li>
+          <li>- <strong>Proteger:</strong> Hardening dos containers Docker, implementação de WAF (Web Application Firewall) contra SQLi e exigência de MFA para qualquer operador de banco.</li>
+          <li>- <strong>Detectar:</strong> SIEM correlacionando logs do cluster Kubernetes com tentativas com falha de autenticação via endpoint <code>/api/v1/pix/transfer</code>.</li>
+          <li>- <strong>Responder:</strong> Runbook automatizado que bloqueia temporariamente a chave do cliente e pausa transferências PIX acima de R$ 50.000 se houver 3 logins geodistantes em 5 minutos.</li>
+          <li>- <strong>Recuperar:</strong> Disaster Recovery com snapshots imutáveis do RDS armazenados em região secundária da nuvem e análise forense dos pacotes capturados.</li>
         </ul>
       </section>
 
@@ -791,8 +791,8 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
             <span>Segurança Física / Perímetro (Firewalls, Proteção DDoS)</span>
           </div>
           <div class="layer-bar layer-5">
-            <span>Camada 2: Muralha Principal e Baluartes</span>
-            <span>Segurança de Rede (Subnets Privadas, IDS/IPS, VPC)</span>
+            <span>Camada 2: Muralha Principal e Baluartes (bastião)</span>
+            <span>Segurança de Rede (Subredes Privadas, IDS/IPS, VPC)</span>
           </div>
           <div class="layer-bar layer-4">
             <span>Camada 3: Pátio Interno e Guardas de Patrulha</span>
@@ -849,9 +849,9 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
 
         <h3>Pilares Técnicos da Arquitetura Zero Trust</h3>
         <ul>
-          <li><strong>Princípio do Menor Privilégio (Least Privilege):</strong> Cada usuário, API ou serviço deve possuir estritamente o mínimo de permissões necessárias para cumprir sua função, e nada mais. Se o serviço precisa apenas ler um registro, ele não recebe permissão de UPDATE ou DELETE.</li>
-          <li><strong>Microsegmentação de Rede:</strong> Em vez de colocar todos os servidores na mesma sub-rede plana, divide-se a rede em zonas isoladas protegidas por firewalls de host. O servidor web não tem rota de rede direta para o banco de dados; ele fala apenas com o serviço intermediário de aplicação por uma porta restrita.</li>
-          <li><strong>Autenticação Contínua e Contextual (MFA em Tudo):</strong> A identidade não é validada apenas no login matinal. Se o dispositivo mudar repentinamente de IP, realizar uma ação incomum ou tentar baixar 5.000 arquivos de uma só vez, o sistema reexige credenciais biométricas imediatas.</li>
+          <li>- <strong>Princípio do Menor Privilégio (Least Privilege):</strong> Cada usuário, API ou serviço deve possuir estritamente o mínimo de permissões necessárias para cumprir sua função, e nada mais. Se o serviço precisa apenas ler um registro, ele não recebe permissão de UPDATE ou DELETE.</li>
+          <li>- <strong>Microsegmentação de Rede:</strong> Em vez de colocar todos os servidores na mesma sub-rede plana, divide-se a rede em zonas isoladas protegidas por firewalls de host. O servidor web não tem rota de rede direta para o banco de dados; ele fala apenas com o serviço intermediário de aplicação por uma porta restrita.</li>
+          <li>- <strong>Autenticação Contínua e Contextual (MFA em Tudo):</strong> A identidade não é validada apenas no login matinal. Se o dispositivo mudar repentinamente de IP, realizar uma ação incomum ou tentar baixar 5.000 arquivos de uma só vez, o sistema reexige credenciais biométricas imediatas.</li>
         </ul>
       </section>
 
@@ -911,10 +911,10 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
 
         <h3>Hierarquia Operacional do SOC</h3>
         <ul>
-          <li><strong>Analistas N1 (Triagem):</strong> Recebem o fluxo massivo de alertas automáticos. Validam se trata-se de um alarme falso (falso positivo, como o gato pulando o muro) ou se há indícios reais de agressão deliberada.</li>
-          <li><strong>Analistas N2 (Investigação e Caça):</strong> Aprofundam a investigação. Analisam dumps de memória, examinam tráfego de rede e correlacionam registros em múltiplos servidores para entender o escopo do ataque.</li>
-          <li><strong>Analistas N3 / Especialistas em DFIR:</strong> A equipe de intervenção rápida. Conduzem a erradicação do invasor, desenvolvem vacinas para a rede e revertem danos em ambientes de missão crítica.</li>
-          <li><strong>Threat Hunters &amp; Engenheiros de Detecção:</strong> Não esperam alertas serem gerados; realizam buscas proativas na rede atrás de invasores ocultos que conseguiram passar despercebidos pelos sistemas automatizados.</li>
+          <li>- <strong>Analistas N1 (Triagem):</strong> Recebem o fluxo massivo de alertas automáticos. Validam se trata-se de um alarme falso (falso positivo, como o gato pulando o muro) ou se há indícios reais de agressão deliberada.</li>
+          <li>- <strong>Analistas N2 (Investigação e Caça):</strong> Aprofundam a investigação. Analisam dumps de memória, examinam tráfego de rede e correlacionam registros em múltiplos servidores para entender o escopo do ataque.</li>
+          <li>- <strong>Analistas N3 / Especialistas em DFIR:</strong> A equipe de intervenção rápida. Conduzem a erradicação do invasor, desenvolvem vacinas para a rede e revertem danos em ambientes de missão crítica.</li>
+          <li>- <strong>Threat Hunters &amp; Engenheiros de Detecção:</strong> Não esperam alertas serem gerados; realizam buscas proativas na rede atrás de invasores ocultos que conseguiram passar despercebidos pelos sistemas automatizados.</li>
         </ul>
 
         <h3>O Arsenal de Ferramentas Essenciais do SOC</h3>
@@ -922,9 +922,9 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
           Assim como o segurança patrimonial utiliza rádios cifrados, binóculos térmicos e sensores de infravermelho, o engenheiro de defesa utiliza um conjunto robusto de soluções:
         </p>
         <ul>
-          <li><strong>SIEM (ex: Elastic Security, Splunk, Wazuh):</strong> O cérebro central. Centraliza terabytes de logs de toda a organização e correlaciona eventos díspares.</li>
-          <li><strong>EDR (Endpoint Detection and Response):</strong> O guarda-costas instalado dentro de cada máquina individual. Monitora chamadas de sistema, impede a injeção de processos e isola a máquina remotamente se detectar anomalia.</li>
-          <li><strong>SOAR (Security Orchestration, Automation and Response):</strong> Automação tática. Executa scripts pré-aprovados na velocidade da luz para conter incidentes comuns.</li>
+          <li>- <strong>SIEM (ex: Elastic Security, Splunk, Wazuh):</strong> O cérebro central. Centraliza terabytes de logs de toda a organização e correlaciona eventos díspares.</li>
+          <li>- <strong>EDR (Endpoint Detection and Response):</strong> O guarda-costas instalado dentro de cada máquina individual. Monitora chamadas de sistema, impede a injeção de processos e isola a máquina remotamente se detectar anomalia.</li>
+          <li>- <strong>SOAR (Security Orchestration, Automation and Response):</strong> Automação tática. Executa scripts pré-aprovados na velocidade da luz para conter incidentes comuns.</li>
         </ul>
 
         <div class="callout callout-def">
@@ -947,7 +947,7 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
           Atenção, turma: tudo o que estudamos nesta aula é a engrenagem que conecta o conteúdo teórico com as duas entregas finais do nosso projeto no Bacharelado:
         </p>
         <ol>
-          <li><strong>O Plano de Operações e Monitoramento (DevSecOps):</strong> Vocês deverão detalhar como a aplicação de vocês coleta logs estruturados, quais métricas de anomalia acionam alarmes e onde foram posicionados os controles de Defesa em Profundidade.</li>
+          <li><strong>O Plano de Operações e Monitoramento (DevSecOps):</strong> Pense como a aplicação de vocês coleta logs estruturados, quais métricas de anomalia acionam alarmes e onde foram posicionados os controles de Defesa em Profundidade. Não vamos adicionar novos recursos ao projeto, mas refletir sobre o Plano de Operações e Monitoramento é importante.</li>
           <li><strong>O Plano de Resposta a Incidentes (IRP):</strong> O documento tático do grupo contendo os runbooks passo a passo de como o time de vocês conterá o vazamento de chaves ou o sequestro de uma rota crítica da API.</li>
         </ol>
         <p>
@@ -988,12 +988,12 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
         </div>
 
         <div class="callout callout-tip">
-          <div class="callout-header">Pergunta-Guia para Nossa Próxima Aula em Laboratório</div>
+          <div class="callout-header">Pergunta-Guia para Nossa Próxima Aula</div>
           <p style="font-size: 1.05rem; font-weight: 600; margin-bottom: 0.3rem;">
             "Se o atacante conhecesse a planta baixa do castelo tão bem quanto você, qual seria a única barreira que ele ainda assim não conseguiria contornar?"
           </p>
           <p style="margin-bottom: 0; font-size: 0.9rem; color: var(--text-muted);">
-            Tragam suas anotações e hipóteses para o debate inicial da próxima quinta-feira!
+            Tragam suas anotações e hipóteses para o debate inicial da próxima aula!
           </p>
         </div>
       </section>
