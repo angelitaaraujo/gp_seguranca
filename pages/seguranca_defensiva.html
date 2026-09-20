@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Segurança Defensiva (BLUE) — Material de Apoio</title>
+  
+  <!-- Basecoat CSS CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@1.0.2/dist/basecoat.cdn.min.css">
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+  
+  <!-- Fixed Shell CSS -->
+  <style>
+/* Skip artifact shell — fixed styles served beside every artifact.
+   Complements basecoat; artifacts override --accent for their own identity. */
+:root {
+  color-scheme: light dark;
+  --accent: #2563eb;
+  --accent-contrast: #ffffff;
+  --accent-text: color-mix(in srgb, var(--accent) 72%, #000);
+  --bg: #f8f9fb;
+  --surface: #ffffff;
+  --text: #14171f;
+  --text-muted: #5b6472;
+  --border: rgba(20, 23, 31, 0.10);
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(20, 23, 31, 0.08);
+  --space: 16px;
+}
+/* Theme resolution. Without data-theme the viewer's system preference decides,
+   as it always did. With it, the artifact's own choice wins in BOTH directions:
+   a page that hardcodes one palette must not be handed the opposite set of
+   tokens by the machine it happens to be opened on. The dark values appear
+   twice because a media query cannot be folded into a selector list.
+   The attribute sits inside :where() so these blocks keep the specificity of a
+   bare :root — the page's own <style> is linked after this file and must go on
+   overriding any token it wants, exactly as it could before. */
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    --accent-text: color-mix(in srgb, var(--accent) 78%, #fff);
+    --bg: #101318;
+    --surface: #181c23;
+    --text: #eef1f6;
+    --text-muted: #9aa4b2;
+    --border: rgba(238, 241, 246, 0.12);
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+}
+:root:where([data-theme="dark"]) {
+  color-scheme: dark;
+  --accent-text: color-mix(in srgb, var(--accent) 78%, #fff);
+  --bg: #101318;
+  --surface: #181c23;
+  --text: #eef1f6;
+  --text-muted: #9aa4b2;
+  --border: rgba(238, 241, 246, 0.12);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+:root:where([data-theme="light"]) { color-scheme: light; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; display: block; }
+
+.shell-container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+.shell-section { padding: calc(var(--space) * 2) 0; }
+.shell-grid { display: grid; gap: var(--space); grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.shell-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: var(--space); }
+.shell-footer { padding: 24px 0 40px; color: var(--text-muted); font-size: 13px; }
+
+.shell-hero { padding: calc(var(--space) * 3) 0 calc(var(--space) * 2); }
+.shell-hero h1 { font-size: clamp(26px, 4vw, 40px); line-height: 1.15; margin: 0 0 10px; text-wrap: balance; }
+.shell-hero p { color: var(--text-muted); max-width: 60ch; margin: 0; }
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: var(--space);
+}
+
+.kpi { display: flex; flex-direction: column; gap: 4px; }
+.kpi .kpi-value { font-size: 28px; font-weight: 650; line-height: 1.1; }
+.kpi .kpi-label { font-size: 13px; color: var(--text-muted); }
+.kpi .kpi-delta { font-size: 12.5px; font-weight: 600; }
+.kpi .kpi-delta.up { color: #0a8f3c; }
+.kpi .kpi-delta.down { color: #cf3131; }
+
+table.shell-table { border-collapse: collapse; width: 100%; font-size: 14px; }
+table.shell-table th {
+  text-align: left; font-size: 11.5px; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--text-muted); font-weight: 600;
+}
+table.shell-table th, table.shell-table td { padding: 9px 12px 9px 0; border-bottom: 1px solid var(--border); }
+table.shell-table td.num, table.shell-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); }
+
+.chart-box { width: 100%; min-height: 220px; }
+.chart-box svg { width: 100%; height: auto; display: block; }
+
+.muted { color: var(--text-muted); }
+.accent { color: var(--accent-text); }
+.shell-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent-text);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .shell-fade { animation: shell-fade 400ms ease both; }
+  @keyframes shell-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}
+
+</style>
+  
+
+  <style>
+    :root {
+      --accent: #2563eb;
+      --accent-rgb: 37, 99, 235;
+      --accent-glow: rgba(59, 130, 246, 0.25);
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.75;
+      color: var(--text);
+      background-color: var(--bg);
+      scroll-behavior: smooth;
+    }
+
+    /* Reading Progress Bar */
+    #progress-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: transparent;
+      z-index: 1000;
+    }
+    #progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #1d4ed8, #60a5fa);
+      transition: width 0.1s ease-out;
+    }
+
+    /* Layout constraints */
+    .article-wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2.5rem 1.25rem 5rem;
+    }
+
+    /* Header & Meta */
+    .article-header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+      margin-bottom: 2.5rem;
+    }
+    .badge-course {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(37, 99, 235, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      color: var(--accent-text);
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      margin-bottom: 1.25rem;
+    }
+    .article-title {
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+      color: var(--text);
+    }
+    .article-subtitle {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+    }
+    .article-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      align-items: center;
+    }
+    .meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* Table of Contents */
+    .toc-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin: 2.5rem 0;
+    }
+    .toc-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .toc-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 0.5rem 1.25rem;
+      font-size: 0.92rem;
+    }
+    .toc-list a {
+      color: var(--text-muted);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: color 0.15s ease, transform 0.15s ease;
+    }
+    .toc-list a:hover {
+      color: var(--accent-text);
+      transform: translateX(3px);
+    }
+    .toc-num {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent-text);
+      font-weight: 600;
+    }
+
+    /* Content Typography & Sections */
+    .article-body h2 {
+      font-size: 1.7rem;
+      font-weight: 700;
+      margin-top: 3.25rem;
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      scroll-margin-top: 5rem;
+    }
+    .article-body h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-top: 2rem;
+      margin-bottom: 0.75rem;
+      color: var(--text);
+    }
+    .article-body p {
+      margin-bottom: 1.35rem;
+      color: var(--text);
+    }
+    .article-body ul, .article-body ol {
+      margin-bottom: 1.5rem;
+      padding-left: 1.5rem;
+    }
+    .article-body li {
+      margin-bottom: 0.5rem;
+    }
+
+    /* Blockquotes */
+    blockquote.quote-highlight {
+      margin: 2rem 0;
+      padding: 1.25rem 1.5rem;
+      background: rgba(37, 99, 235, 0.08);
+      border-left: 4px solid var(--accent);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text);
+    }
+    blockquote.quote-highlight footer {
+      margin-top: 0.6rem;
+      font-size: 0.85rem;
+      font-style: normal;
+      color: var(--text-muted);
+    }
+
+    /* Callout Boxes */
+    .callout {
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin: 2rem 0;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .callout-def {
+      border-left: 4px solid #3b82f6;
+      background: rgba(59, 130, 246, 0.05);
+    }
+    .callout-tip {
+      border-left: 4px solid #10b981;
+      background: rgba(16, 185, 129, 0.05);
+    }
+    .callout-think {
+      border-left: 4px solid #f59e0b;
+      background: rgba(245, 158, 11, 0.05);
+    }
+    .callout-header {
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .callout-def .callout-header { color: #60a5fa; }
+    .callout-tip .callout-header { color: #34d399; }
+    .callout-think .callout-header { color: #fbbf24; }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      margin: 2rem 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+    table.content-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      text-align: left;
+    }
+    table.content-table th {
+      background: rgba(255, 255, 255, 0.04);
+      padding: 0.85rem 1rem;
+      font-weight: 600;
+      color: var(--text);
+      border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+    }
+    table.content-table td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: top;
+    }
+    table.content-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Diagram & Visual representations */
+    .castle-layers {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin: 2rem 0;
+      padding: 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .layer-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.25rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: transform 0.15s ease;
+    }
+    .layer-bar:hover {
+      transform: scale(1.01);
+    }
+    .layer-6 { background: #1e3a8a; color: #dbeafe; border-left: 5px solid #3b82f6; } /* Perímetro */
+    .layer-5 { background: #1e40af; color: #dbeafe; border-left: 5px solid #60a5fa; } /* Rede */
+    .layer-4 { background: #1d4ed8; color: #eff6ff; border-left: 5px solid #93c5fd; } /* Endpoint/Host */
+    .layer-3 { background: #2563eb; color: #ffffff; border-left: 5px solid #bfdbfe; } /* Aplicação */
+    .layer-2 { background: #3b82f6; color: #ffffff; border-left: 5px solid #dbeafe; } /* Dados */
+    .layer-1 { background: #0284c7; color: #ffffff; border-left: 5px solid #e0f2fe; } /* Cofre Central */
+
+    /* Micro-Task Interactive Tool */
+    .task-box {
+      background: var(--surface);
+      border: 2px dashed rgba(59, 130, 246, 0.4);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      margin: 2.5rem 0;
+    }
+    .task-input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 0.75rem 1rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      margin-top: 0.4rem;
+      margin-bottom: 1rem;
+    }
+    .task-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    }
+    .btn-action {
+      background: var(--accent);
+      color: #ffffff;
+      border: none;
+      padding: 0.65rem 1.3rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+    .btn-action:hover {
+      background: #1d4ed8;
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.65rem 1.2rem;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-left: 0.5rem;
+      transition: background 0.15s;
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Print styling */
+    @media print {
+      #progress-container, .btn-action, .btn-secondary, .toc-card, .task-box button {
+        display: none !important;
+      }
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .article-wrap {
+        max-width: 100% !important;
+        padding: 0 !important;
+      }
+      .callout, .table-container, .castle-layers {
+        border-color: #ccc !important;
+        background: #fafafa !important;
+        color: #000000 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Reading Progress Indicator -->
+  <div id="progress-container">
+    <div id="progress-bar"></div>
+  </div>
+
+  <main class="article-wrap">
+
+    <!-- Header / Context Metadata -->
+    <header class="article-header">
+      <div class="badge-course">
+        <span>🛡️</span> IFC Videira &bull; Bacharelado em Ciência da Computação &bull; Segurança em Sistemas
+      </div>
+      <h1 class="article-title">Segurança Defensiva (BLUE): O Time que Protege</h1>
+      <p class="article-subtitle">
+        Da invasão à guarda patrimonial: como o mesmo conhecimento que abriu a mansão do Sinhozinho Malta agora constrói fortalezas resilientes.
+      </p>
+
+      <div class="article-meta">
+        <span class="meta-item"><strong>Aula:</strong> 01 — Bloco Defensivo</span>
+        <span class="meta-item">&bull;</span>
+        <span class="meta-item"><strong>Tempo estimado:</strong> ~25 min de leitura técnica</span>
+        <span class="meta-item">&bull;</span>
+        <span class="meta-item"><strong>Material:</strong> Didático / Teórico-Prático</span>
+        <span class="meta-item" style="margin-left: auto;">
+          <button onclick="window.print()" class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.82rem;">🖨️ Salvar em PDF</button>
+        </span>
+      </div>
+    </header>
+
+    <!-- Warm Welcome Note from Professor -->
+    <div class="callout callout-def" style="margin-top: 0;">
+      <div class="callout-header">
+        <span>👋</span> Nota da Professora
+      </div>
+      <p style="margin-bottom: 0;">
+        Olá, pessoal! Na aula passada vestimos as máscaras do Red Team: modelamos ameaças e exploramos brechas como os invasores de <em>La Casa de Papel</em> invadindo a mansão do Sinhozinho Malta. Foi divertido e revelador ver as fraquezas surgirem. Mas hoje trocamos de uniforme. Nós fomos contratados como a equipe de elite de <strong>Segurança Patrimonial e Tática</strong> para transformar aquela mesma casa num cofre intransponível. Preparem o café, leiam com atenção e façam anotações para o nosso projeto semestral!
+      </p>
+    </div>
+
+    <!-- Table of Contents -->
+    <nav class="toc-card" aria-label="Sumário da aula">
+      <div class="toc-title">
+        <span>📑 Sumário do Artigo de Apoio</span>
+        <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);">12 Seções</span>
+      </div>
+      <ul class="toc-list">
+        <li><a href="#sec-1"><span class="toc-num">01.</span> Introdução ao Blue Team</a></li>
+        <li><a href="#sec-2"><span class="toc-num">02.</span> O Mindset Defensivo</a></li>
+        <li><a href="#sec-3"><span class="toc-num">03.</span> Competências do Guardião</a></li>
+        <li><a href="#sec-4"><span class="toc-num">04.</span> A Analogia da Mansão</a></li>
+        <li><a href="#sec-5"><span class="toc-num">05.</span> Blue Team vs. Red Team</a></li>
+        <li><a href="#sec-6"><span class="toc-num">06.</span> NIST Cybersecurity Framework</a></li>
+        <li><a href="#sec-7"><span class="toc-num">07.</span> Defesa em Profundidade</a></li>
+        <li><a href="#sec-8"><span class="toc-num">08.</span> Zero Trust Architecture (ZTA)</a></li>
+        <li><a href="#sec-9"><span class="toc-num">09.</span> Estudo de Caso: Banco Seguro</a></li>
+        <li><a href="#sec-10"><span class="toc-num">10.</span> O SOC (Operations Center)</a></li>
+        <li><a href="#sec-11"><span class="toc-num">11.</span> Conexão com o Portfólio</a></li>
+        <li><a href="#sec-12"><span class="toc-num">12.</span> Fechamento &amp; Micro-Tarefa</a></li>
+      </ul>
+    </nav>
+
+    <!-- Article Content -->
+    <article class="article-body">
+
+      <!-- SECTION 1 -->
+      <section id="sec-1">
+        <h2><span>01.</span> Introdução — O que é Segurança Defensiva (BLUE)?</h2>
+        <p>
+          No universo corporativo e militar, o conceito de <strong>Segurança Defensiva</strong> (comumente materializado como <em>Blue Team</em>) define a postura contínua, analítica e proativa dedicada a blindar ativos digitais, monitorar ameaças, neutralizar intrusões em tempo real e restabelecer operações com integridade garantida.
+        </p>
+        <p>
+          Um erro clássico cometido por iniciantes em Ciência da Computação é confundir segurança defensiva com "apagar incêndios" ou suporte de TI reativo. Segurança defensiva <strong>não é</strong> esperar o ransomware criptografar um servidor para então reinstalar o sistema operacional. Pelo contrário: é o planejamento arquitetural meticuloso que garante que, se um computador for comprometido, a ameaça fique confinada em uma jaula estanque.
+        </p>
+
+        <div class="callout callout-def">
+          <div class="callout-header">Definição Fundamental: O Ciclo Defensivo Contínuo</div>
+          <p style="margin-bottom: 0;">
+            A defesa cibernética opera em um ciclo ininterrupto de 5 verbos: 
+            <strong>Proteger</strong> (reduzir a superfície de exposição) &rarr; 
+            <strong>Detectar</strong> (perceber anomalias e movimentações sutis) &rarr; 
+            <strong>Responder</strong> (conter e expelir o intruso) &rarr; 
+            <strong>Recuperar</strong> (restaurar o estado íntegro com zero perda) &rarr; 
+            <strong>Aprender</strong> (retroalimentar o sistema para que aquela técnica nunca mais funcione).
+          </p>
+        </div>
+
+        <p>
+          A mudança de perspectiva é profunda: enquanto o invasor precisa achar apenas <em>uma</em> janela destrancada em uma noite de chuva, a segurança patrimonial precisa manter todas as portas, janelas, dutos de ar e canos blindados 24 horas por dia, 365 dias por ano.
+        </p>
+      </section>
+
+      <!-- SECTION 2 -->
+      <section id="sec-2">
+        <h2><span>02.</span> O Mindset do Blue Team</h2>
+        <p>
+          Construir softwares ou infraestruturas seguras exige uma reformulação psicológica do engenheiro. O Blue Team não opera sob a ilusão do "meu sistema é inexpugnável". Essa presunção é fatal na computação moderna.
+        </p>
+        
+        <blockquote class="quote-highlight">
+          "O Blue Team não espera o alarme tocar na calada da noite: ele inspeciona os fios, testa os sensores e tenta enganar o próprio alarme todos os dias."
+          <footer>— Princípio Tático de Defesa</footer>
+        </blockquote>
+
+        <p>Os pilares do mindset defensivo fundamentam-se em:</p>
+        <ul>
+          <li><strong>Assumir o comprometimento (Assume Breach):</strong> Trabalhe arquitetando os sistemas com a premissa de que o adversário <em>já possui</em> uma credencial de acesso ou já colocou um pé dentro da rede corporativa. A pergunta nunca é "como impedir que alguém tente entrar?", mas sim "quando entrarem, o que encontrarão pela frente?".</li>
+          <li><strong>Detecção precoce (Mean Time to Detect - MTTD):</strong> Um ladrão que passa 200 dias invisível dentro de uma residência tem tempo para abrir o cofre com calma. Se ele for detectado nos primeiros 90 segundos ao pisar no gramado, o dano é nulo.</li>
+          <li><strong>Humildade técnica:</strong> Não existe software perfeito. Se há código, há complexidade; se há complexidade, existem caminhos não mapeados.</li>
+          <li><strong>Vigilância e telemetria:</strong> Se uma porta bateu no corredor e ninguém registrou o som, o evento não existe. Para a defesa, ausência de logs equivale a cegueira tática voluntária.</li>
+          <li><strong>Documentação e Runbooks:</strong> Sob estresse e crise real de intrusão, seres humanos cometem falhas cognitivas. Procedimentos operacionais padronizados salvam organizações.</li>
+        </ul>
+      </section>
+
+      <!-- SECTION 3 -->
+      <section id="sec-3">
+        <h2><span>03.</span> Conhecimentos que o Time Precisa Dominar</h2>
+        <p>
+          Para ser um guardião eficaz na Ciência da Computação, não basta ser "usuário de ferramentas". É indispensável compreender a física e a lógica do mundo computacional. Vejamos o arsenal de conhecimento exigido:
+        </p>
+
+        <div class="table-container">
+          <table class="content-table">
+            <thead>
+              <tr>
+                <th>Domínio</th>
+                <th>O que o Blue Team estuda e executa</th>
+                <th>Importância Tática</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Redes de Computadores</strong></td>
+                <td>Pilha TCP/IP, cabeçalhos, DNS, BGP, TLS, análise de pacotes (PCAP), segmentação VLAN e roteamento.</td>
+                <td>Identificar conexões anômalas de comando e controle (C2) e exfiltração de dados por túneis DNS.</td>
+              </tr>
+              <tr>
+                <td><strong>Sistemas Operacionais</strong></td>
+                <td>Internals do Windows (Sysmon, Event IDs, Registry) e Linux (Auditd, /proc, PAM, Daemons).</td>
+                <td>Perceber processos legítimos sendo sequestrados (process hollowing, injeção de DLL, privilégios sudo).</td>
+              </tr>
+              <tr>
+                <td><strong>Engenharia de Logs</strong></td>
+                <td>Coleta de eventos em larga escala, formatação JSON/CEF, pipeline de ingestão e normalização.</td>
+                <td>Transformar bilhões de eventos silenciosos em sinais claros de intrusão sem gerar fadiga de alerta.</td>
+              </tr>
+              <tr>
+                <td><strong>Criptografia Aplicada</strong></td>
+                <td>Cifras simétricas/assimétricas, hashing seguro (Argon2, bcrypt), certificados X.509, mTLS.</td>
+                <td>Garantir que dados em repouso e em trânsito permaneçam indecifráveis mesmo se interceptados.</td>
+              </tr>
+              <tr>
+                <td><strong>Threat Intelligence</strong></td>
+                <td>Indicadores de Comprometimento (IoCs), Táticas, Técnicas e Procedimentos (TTPs), feeds de ameaças.</td>
+                <td>Saber com antecedência quais ferramentas e métodos quadrilhas organizadas estão utilizando.</td>
+              </tr>
+              <tr>
+                <td><strong>Forense Digital &amp; DFIR</strong></td>
+                <td>Aquisição de memória RAM volátil, recuperação de artefatos de disco, timeline de eventos.</td>
+                <td>Reconstituir milissegundo a milissegundo os passos do intruso para responder a auditorias judiciais.</td>
+              </tr>
+              <tr>
+                <td><strong>Automação &amp; Scripting</strong></td>
+                <td>Python, Bash, PowerShell e APIs para orquestração de bloqueios automáticos.</td>
+                <td>Isolar uma máquina infectada da rede em frações de segundo sem intervenção humana lenta.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SECTION 4 -->
+      <section id="sec-4">
+        <h2><span>04.</span> A Analogia da Mansão: O Caseiro, o Invasor e os Guardas</h2>
+        <p>
+          Recapitulando nossa dinâmica em sala: na aula passada, vocês mapearam a luxuosa mansão do Sinhozinho Malta com olhos de assaltantes de banco. Vocês descobriram que a cerca viva dos fundos estava desprovida de sensores, que o cachorro comia carne jogada por cima do muro e que o cofre ficava atrás de um quadro na biblioteca.
+        </p>
+        <p>
+          Agora imaginem o choque de realidade: <strong>Sinhozinho Malta descobriu as fragilidades e nos contratou como chefes de segurança patrimonial</strong>.
+        </p>
+
+        <div class="callout callout-think">
+          <div class="callout-header">Ponto de Reflexão: A Dualidade do Conhecimento</div>
+          <p style="margin-bottom: 0;">
+            O invasor estuda a fechadura para destrancá-la com uma gazua silenciosa. O chaveiro tático da segurança estuda exatamente a <em>mesma</em> fechadura para instalar pinos anti-gazua e sensores de vibração. O conhecimento técnico de baixo nível é idêntico; o que muda é a <strong>intenção ética</strong> e a <strong>missão sistêmica</strong>.
+          </p>
+        </div>
+
+        <p>
+          Como responsáveis pela mansão, não podemos simplesmente colocar uma sentinela na porta da frente e ir dormir. Se o ladrão fingir ser o carteiro que entrega encomendas diárias? Se ele subornar um funcionário interno? Se ele cortar a energia da rua? Proteger uma mansão exige perímetros concêntricos, checagem constante de identidades e vigilância velada.
+        </p>
+      </section>
+
+      <!-- SECTION 5 -->
+      <section id="sec-5">
+        <h2><span>05.</span> Blue Team vs. Red Team: Cooperação Tática</h2>
+        <p>
+          Muitos alunos chegam com a ideia romanceada de que o Red Team é o "mocinho destemido" e o Blue Team é a "burocracia chata". Na prática da engenharia de software e de sistemas, eles são duas faces da mesma moeda de resiliência.
+        </p>
+
+        <div class="table-container">
+          <table class="content-table">
+            <thead>
+              <tr>
+                <th>Característica</th>
+                <th>Red Team (Segurança Ofensiva)</th>
+                <th>Blue Team (Segurança Defensiva)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Objetivo Primário</strong></td>
+                <td>Encontrar caminhos viáveis de exploração e testar hipóteses de invasão.</td>
+                <td>Prevenir ataques, detectar anomalias, conter incidentes e blindar o ambiente.</td>
+              </tr>
+              <tr>
+                <td><strong>Tempo de Atuação</strong></td>
+                <td>Pontual (campanhas, exercícios de emulação de adversário, pentests).</td>
+                <td>Permanente (operação contínua 24x7x365).</td>
+              </tr>
+              <tr>
+                <td><strong>Linguagem Comum</strong></td>
+                <td colspan="2" style="text-align: center; font-weight: 600; background: rgba(37, 99, 235, 0.1);">
+                  <strong>MITRE ATT&amp;CK Framework</strong> (Matriz universal de táticas e técnicas)
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Resultado Esperado</strong></td>
+                <td>Relatório de vulnerabilidades exploradas com prova de conceito.</td>
+                <td>Sistemas endurecidos (hardened), regras de SIEM calibradas e runbooks validados.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          Quando ambos os times trabalham em conjunto com diálogo aberto, temos o chamado <strong>Purple Teaming</strong>: o Red Team executa uma técnica específica (por exemplo, <em>Pass-the-Hash</em>) enquanto o Blue Team ajusta os sensores de telemetria em tempo real para verificar se o alarme soou com precisão cirúrgica.
+        </p>
+      </section>
+
+      <!-- SECTION 6 -->
+      <section id="sec-6">
+        <h2><span>06.</span> O Ciclo do NIST Cybersecurity Framework (CSF)</h2>
+        <p>
+          Para que a defesa não seja uma colcha de retalhos desordenada, institutos globais padronizam estruturas operacionais. O mais respeitado mundialmente é o <strong>NIST CSF (Cybersecurity Framework)</strong>, composto por 5 funções sequenciais e complementares:
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: 1.5rem 0;">
+          <div style="background: var(--surface); border: 1px solid var(--border); border-top: 4px solid #3b82f6; padding: 1rem; border-radius: 6px;">
+            <h4 style="margin: 0 0 0.5rem 0; color: #60a5fa;">1. IDENTIFICAR</h4>
+            <p style="font-size: 0.88rem; margin: 0; color: var(--text-muted);">
+              Mapear ativos, dados críticos, softwares, dependências e analisar o risco de cada componente. Você não defende o que não conhece.
+            </p>
+          </div>
+          <div style="background: var(--surface); border: 1px solid var(--border); border-top: 4px solid #10b981; padding: 1rem; border-radius: 6px;">
+            <h4 style="margin: 0 0 0.5rem 0; color: #34d399;">2. PROTEGER</h4>
+            <p style="font-size: 0.88rem; margin: 0; color: var(--text-muted);">
+              Implementar salvaguardas: MFA, WAF, controle de acessos, criptografia em trânsito e repouso, e conscientização dos operadores.
+            </p>
+          </div>
+          <div style="background: var(--surface); border: 1px solid var(--border); border-top: 4px solid #f59e0b; padding: 1rem; border-radius: 6px;">
+            <h4 style="margin: 0 0 0.5rem 0; color: #fbbf24;">3. DETECTAR</h4>
+            <p style="font-size: 0.88rem; margin: 0; color: var(--text-muted);">
+              Monitoramento 24/7 com SIEM e EDR. Identificar disparos de anomalias, picos de tráfego atípicos e movimentação lateral.
+            </p>
+          </div>
+          <div style="background: var(--surface); border: 1px solid var(--border); border-top: 4px solid #ef4444; padding: 1rem; border-radius: 6px;">
+            <h4 style="margin: 0 0 0.5rem 0; color: #f87171;">4. RESPONDER</h4>
+            <p style="font-size: 0.88rem; margin: 0; color: var(--text-muted);">
+              Ação de contenção imediata: isolar máquinas infectadas da rede, revogar tokens comprometidos, mitigar danos e comunicar partes.
+            </p>
+          </div>
+          <div style="background: var(--surface); border: 1px solid var(--border); border-top: 4px solid #8b5cf6; padding: 1rem; border-radius: 6px;">
+            <h4 style="margin: 0 0 0.5rem 0; color: #a78bfa;">5. RECUPERAR</h4>
+            <p style="font-size: 0.88rem; margin: 0; color: var(--text-muted);">
+              Restaurar sistemas através de backups validados, corrigir brechas exploradas e registrar lições aprendidas (post-mortem).
+            </p>
+          </div>
+        </div>
+
+        <h3>Aplicação Prática no Projeto: O "Banco Seguro"</h3>
+        <p>
+          Em nosso projeto da disciplina, o <strong>Banco Seguro</strong> atende milhares de transações financeiras. Como cada função do NIST se traduz na prática do nosso sistema financeiro?
+        </p>
+        <ul>
+          <li><strong>Identificar:</strong> Inventário dinâmico de todos os microserviços de pagamento, chaves de API PIX cadastradas e catalogação de bases PostgreSQL.</li>
+          <li><strong>Proteger:</strong> Hardening dos containers Docker, implementação de WAF (Web Application Firewall) contra SQLi e exigência de MFA para qualquer operador de banco.</li>
+          <li><strong>Detectar:</strong> SIEM correlacionando logs do cluster Kubernetes com tentativas com falha de autenticação via endpoint <code>/api/v1/pix/transfer</code>.</li>
+          <li><strong>Responder:</strong> Runbook automatizado que bloqueia temporariamente a chave do cliente e pausa transferências PIX acima de R$ 50.000 se houver 3 logins geodistantes em 5 minutos.</li>
+          <li><strong>Recuperar:</strong> Disaster Recovery com snapshots imutáveis do RDS armazenados em região secundária da nuvem e análise forense dos pacotes capturados.</li>
+        </ul>
+      </section>
+
+      <!-- SECTION 7 -->
+      <section id="sec-7">
+        <h2><span>07.</span> Defesa em Profundidade (Defense-in-Depth)</h2>
+        <p>
+          O princípio da <strong>Defesa em Profundidade</strong> remonta à engenharia militar dos castelos medievais concêntricos. Um castelo impenetrável jamais dependia exclusivamente de sua primeira muralha.
+        </p>
+
+        <!-- Medieval Castle Layers Visual Breakdown -->
+        <div class="castle-layers">
+          <div style="font-weight: 700; margin-bottom: 0.5rem; color: var(--accent-text);">
+            🏰 A Fortaleza Concéntrica e as Camadas de Sistemas:
+          </div>
+          <div class="layer-bar layer-6">
+            <span>Camada 1: Fosso e Portaria Externa</span>
+            <span>Segurança Física / Perímetro (Firewalls, Proteção DDoS)</span>
+          </div>
+          <div class="layer-bar layer-5">
+            <span>Camada 2: Muralha Principal e Baluartes</span>
+            <span>Segurança de Rede (Subnets Privadas, IDS/IPS, VPC)</span>
+          </div>
+          <div class="layer-bar layer-4">
+            <span>Camada 3: Pátio Interno e Guardas de Patrulha</span>
+            <span>Segurança de Host / Endpoint (EDR, Hardening do Kernel)</span>
+          </div>
+          <div class="layer-bar layer-3">
+            <span>Camada 4: Portas Blindadas dos Aposentos</span>
+            <span>Segurança da Aplicação (Autenticação JWT, Validação de Inputs)</span>
+          </div>
+          <div class="layer-bar layer-2">
+            <span>Camada 5: Cofre Fechado a Sete Chaves</span>
+            <span>Segurança de Dados (Criptografia AES-256 em repouso)</span>
+          </div>
+          <div class="layer-bar layer-1">
+            <span>Camada Central: A Sala do Trono</span>
+            <span>Políticas e Conscientização Humana (Governança e Treinamento)</span>
+          </div>
+        </div>
+
+        <h3>O Perigo Letal do Ponto Único de Falha (Single Point of Failure)</h3>
+        <p>
+          Construir um sistema com apenas uma camada é como construir uma mansão magnífica cuja segurança depende inteiramente de uma única fechadura na porta principal. Se alguém roubar a chave, a mansão inteira cai de joelhos.
+        </p>
+
+        <div class="callout callout-think">
+          <div class="callout-header">Caso Real: O Ataque ao Mecanismo PIX via Credencial de Terceiro</div>
+          <p>
+            Em incidentes reais recentes no setor financeiro brasileiro, criminosos não quebraram a criptografia matemática do Banco Central. Eles obtiveram, por meio de phishing, as credenciais legítimas de uma empresa terceirizada que prestava serviços de suporte técnico.
+          </p>
+          <p style="margin-bottom: 0;">
+            <strong>Sem Defesa em Profundidade:</strong> A credencial externa permitiu acesso direto ao banco de dados produtivo e à movimentação de fundos. Uma falha = Catástrofe sistêmica.<br>
+            <strong>Com Defesa em Profundidade:</strong> Mesmo com a credencial legítima, o atacante é barrado pela ausência de token MFA físico; se burlar o MFA, é barrado pela microsegmentação de rede que impede a rede de suporte de alcançar o core bancário; se furar a rede, o comportamento anômalo é alertado pelo SIEM. <em>Uma falha vira apenas um alerta de segurança contido!</em>
+          </p>
+        </div>
+      </section>
+
+      <!-- SECTION 8 -->
+      <section id="sec-8">
+        <h2><span>08.</span> Zero Trust Architecture (ZTA): O Fim do Perímetro Confiável</h2>
+        <p>
+          Historicamente, a segurança patrimonial acreditava no modelo "Castelo e Fosso": tudo o que está fora é perigoso; tudo o que conseguiu passar pelo portão principal é considerado amigo e pode circular livremente pelos corredores.
+        </p>
+        <p>
+          Na computação contemporânea, esse modelo faliu. Computadores pessoais conectados via VPN, trabalho remoto, dispositivos móveis e funcionários mal-intencionados provaram que o perigo já pode estar <em>dentro</em> da residência. Surge então o paradigma do <strong>Zero Trust</strong>.
+        </p>
+
+        <blockquote class="quote-highlight">
+          "Never Trust, Always Verify." (Nunca confie, sempre verifique). Em Zero Trust, localização física não confere autoridade.
+        </blockquote>
+
+        <p>
+          Retornando à nossa mansão do Sinhozinho Malta: mesmo o caseiro de confiança, que trabalha na propriedade há 15 anos, não pode simplesmente entrar no cofre da biblioteca sem apresentar identificação biométrica e justificar a necessidade daquela abertura naquele minuto exato.
+        </p>
+
+        <h3>Pilares Técnicos da Arquitetura Zero Trust</h3>
+        <ul>
+          <li><strong>Princípio do Menor Privilégio (Least Privilege):</strong> Cada usuário, API ou serviço deve possuir estritamente o mínimo de permissões necessárias para cumprir sua função, e nada mais. Se o serviço precisa apenas ler um registro, ele não recebe permissão de UPDATE ou DELETE.</li>
+          <li><strong>Microsegmentação de Rede:</strong> Em vez de colocar todos os servidores na mesma sub-rede plana, divide-se a rede em zonas isoladas protegidas por firewalls de host. O servidor web não tem rota de rede direta para o banco de dados; ele fala apenas com o serviço intermediário de aplicação por uma porta restrita.</li>
+          <li><strong>Autenticação Contínua e Contextual (MFA em Tudo):</strong> A identidade não é validada apenas no login matinal. Se o dispositivo mudar repentinamente de IP, realizar uma ação incomum ou tentar baixar 5.000 arquivos de uma só vez, o sistema reexige credenciais biométricas imediatas.</li>
+        </ul>
+      </section>
+
+      <!-- SECTION 9 -->
+      <section id="sec-9">
+        <h2><span>09.</span> Estudo de Caso: Arquitetura Defensiva do "Banco Seguro"</h2>
+        <p>
+          Para o projeto prático que vocês estão desenvolvendo no laboratório, vamos consolidar como os frameworks e conceitos convergem na nossa infraestrutura em nuvem na AWS:
+        </p>
+
+        <div class="table-container">
+          <table class="content-table">
+            <thead>
+              <tr>
+                <th>Conceito Teórico</th>
+                <th>Analogia da Mansão / Guarda</th>
+                <th>Implementação Técnica no Banco Seguro</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>WAF &amp; Rate Limiting</strong></td>
+                <td>Guarita externa inspecionando carros e barrando multidões na calçada.</td>
+                <td>AWS WAF na frente do Application Load Balancer filtrando payloads maliciosos e limitando chamadas na rota <code>/pix/transfer</code>.</td>
+              </tr>
+              <tr>
+                <td><strong>Segmentação de Rede</strong></td>
+                <td>Pátio de visitantes separado da ala íntima e dos cofres por portas pesadas.</td>
+                <td>VPC com Sub-redes Públicas (somente Load Balancer) e Sub-redes Privadas sem IP público (onde rodam os containers da aplicação).</td>
+              </tr>
+              <tr>
+                <td><strong>Isolamento de Banco de Dados</strong></td>
+                <td>Cofre reforçado no subsolo, acessível apenas por um duto blindado específico.</td>
+                <td>Instância Amazon RDS (PostgreSQL) em sub-rede de banco isolada, aceitando conexões exclusivamente na porta 5432 oriundas do Security Group do backend.</td>
+              </tr>
+              <tr>
+                <td><strong>Bastion Host (Jump Box)</strong></td>
+                <td>Portão de serviço único com vigilante revistando ferramentas de operários.</td>
+                <td>Acesso SSH restrito a um servidor bastion com autenticação por chave criptográfica e túnel VPN fechado. Nenhum servidor aceita SSH direto da internet.</td>
+              </tr>
+              <tr>
+                <td><strong>Segredos e Chaves</strong></td>
+                <td>Guarda-volumes com senhas rotativas onde guardas não sabem os segredos mestres.</td>
+                <td>AWS Secrets Manager com injeção automática em memória nas variáveis de ambiente dos containers. Zero senhas hardcoded no repositório Git!</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SECTION 10 -->
+      <section id="sec-10">
+        <h2><span>10.</span> O SOC (Security Operations Center) — O Quartel-General da Defesa</h2>
+        <p>
+          Se o Blue Team é a organização tática de segurança patrimonial, o <strong>SOC</strong> é a sua central de monitoramento blindada, repleta de monitores com transmissão ao vivo de todas as câmeras, sensores de pressão e telemetria da mansão. <strong>O SOC nunca dorme.</strong>
+        </p>
+
+        <h3>Hierarquia Operacional do SOC</h3>
+        <ul>
+          <li><strong>Analistas N1 (Triagem):</strong> Recebem o fluxo massivo de alertas automáticos. Validam se trata-se de um alarme falso (falso positivo, como o gato pulando o muro) ou se há indícios reais de agressão deliberada.</li>
+          <li><strong>Analistas N2 (Investigação e Caça):</strong> Aprofundam a investigação. Analisam dumps de memória, examinam tráfego de rede e correlacionam registros em múltiplos servidores para entender o escopo do ataque.</li>
+          <li><strong>Analistas N3 / Especialistas em DFIR:</strong> A equipe de intervenção rápida. Conduzem a erradicação do invasor, desenvolvem vacinas para a rede e revertem danos em ambientes de missão crítica.</li>
+          <li><strong>Threat Hunters &amp; Engenheiros de Detecção:</strong> Não esperam alertas serem gerados; realizam buscas proativas na rede atrás de invasores ocultos que conseguiram passar despercebidos pelos sistemas automatizados.</li>
+        </ul>
+
+        <h3>O Arsenal de Ferramentas Essenciais do SOC</h3>
+        <p>
+          Assim como o segurança patrimonial utiliza rádios cifrados, binóculos térmicos e sensores de infravermelho, o engenheiro de defesa utiliza um conjunto robusto de soluções:
+        </p>
+        <ul>
+          <li><strong>SIEM (ex: Elastic Security, Splunk, Wazuh):</strong> O cérebro central. Centraliza terabytes de logs de toda a organização e correlaciona eventos díspares.</li>
+          <li><strong>EDR (Endpoint Detection and Response):</strong> O guarda-costas instalado dentro de cada máquina individual. Monitora chamadas de sistema, impede a injeção de processos e isola a máquina remotamente se detectar anomalia.</li>
+          <li><strong>SOAR (Security Orchestration, Automation and Response):</strong> Automação tática. Executa scripts pré-aprovados na velocidade da luz para conter incidentes comuns.</li>
+        </ul>
+
+        <div class="callout callout-def">
+          <div class="callout-header">Fluxo Real de um Incidente: Ataque à API PIX no Banco Seguro</div>
+          <ol style="margin-bottom: 0; padding-left: 1.25rem;">
+            <li><strong>02h14min:</strong> O WAF detecta 150 requisições por segundo contendo caracteres maliciosos na rota <code>/pix/confirm</code>.</li>
+            <li><strong>02h14min30s:</strong> O SIEM correlaciona essas tentativas com logins sucedidos originados da cidade de São Petersburgo em uma conta corporativa de operador bancário. Alerta Crítico Nível 1 disparado.</li>
+            <li><strong>02h15min:</strong> O Analista N1 do SOC verifica a incongruência e escala para o N2 em serviço.</li>
+            <li><strong>02h17min:</strong> O Analista N2 confirma atividade de roubo de credencial e aciona o <em>Runbook de Emergência de Contenção PIX</em>.</li>
+            <li><strong>02h18min:</strong> O SOAR invalida todos os tokens daquela sessão, congela temporariamente os limites transacionais daquela conta e instrui o Firewall a descartar pacotes do IP de origem.</li>
+            <li><strong>Manhã seguinte:</strong> Realizada a reunião de Lições Aprendidas; criada nova regra de SIEM para detecção preventiva daquela técnica.</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- SECTION 11 -->
+      <section id="sec-11">
+        <h2><span>11.</span> Como o Blue Team Alimenta o Nosso Projeto da Disciplina</h2>
+        <p>
+          Atenção, turma: tudo o que estudamos nesta aula é a engrenagem que conecta o conteúdo teórico com as duas entregas finais do nosso projeto no Bacharelado:
+        </p>
+        <ol>
+          <li><strong>O Plano de Operações e Monitoramento (DevSecOps):</strong> Vocês deverão detalhar como a aplicação de vocês coleta logs estruturados, quais métricas de anomalia acionam alarmes e onde foram posicionados os controles de Defesa em Profundidade.</li>
+          <li><strong>O Plano de Resposta a Incidentes (IRP):</strong> O documento tático do grupo contendo os runbooks passo a passo de como o time de vocês conterá o vazamento de chaves ou o sequestro de uma rota crítica da API.</li>
+        </ol>
+        <p>
+          O Blue Team é a ponte de aço entre as políticas escritas no papel e a sobrevivência do código rodando em produção. Não entreguem código sem prever onde os olhos do guardião estarão focados!
+        </p>
+      </section>
+
+      <!-- SECTION 12 -->
+      <section id="sec-12">
+        <h2><span>12.</span> Fechamento &amp; Micro-Tarefa Prática para os Alunos</h2>
+        <p>
+          Chegamos ao fim da nossa primeira imersão no universo defensivo. Para fixarmos este conteúdo antes do nosso próximo encontro no laboratório de redes, preparei uma atividade de fixação individual.
+        </p>
+
+        <div class="task-box">
+          <div style="font-weight: 700; font-size: 1.1rem; color: var(--accent-text); margin-bottom: 0.5rem;">
+            ✍️ Micro-Tarefa de Fixação: Tríade Técnica &rarr; Detecção &rarr; Resposta
+          </div>
+          <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+            Escolha uma técnica adversária que usamos na aula anterior (ou consulte a matriz <strong>MITRE ATT&amp;CK</strong>) e documente como a sua equipe de guarda patrimonial digital a detectaria e conteria no Banco Seguro. Utilize o assistente abaixo para gerar seu rascunho de entrega:
+          </p>
+
+          <label for="technique-input" style="font-weight: 600; font-size: 0.9rem;">1. Técnica Invasora Escolhida (ex: Força Bruta, SQL Injection, Roubo de Token JWT):</label>
+          <input type="text" id="technique-input" class="task-input" placeholder="Ex: Credential Stuffing contra o portal do cliente" value="Força Bruta distribuída na autenticação de clientes">
+
+          <label for="detection-input" style="font-weight: 600; font-size: 0.9rem;">2. Como o Blue Team detectaria precocemente essa ação? (Logs, SIEM, Alertas):</label>
+          <input type="text" id="detection-input" class="task-input" placeholder="Ex: Regra no SIEM monitorando Event ID com mais de 10 falhas/min por IP..." value="Regra no SIEM agregando logs de 401 Unauthorized com threshold de 5 falhas por IP em 30s.">
+
+          <label for="response-input" style="font-weight: 600; font-size: 0.9rem;">3. Qual é a resposta tática de contenção imediata? (Runbook, Bloqueio, Isolamento):</label>
+          <input type="text" id="response-input" class="task-input" placeholder="Ex: Inclusão automática na blacklist do WAF por 1 hora e notificação do cliente via SMS..." value="Bloqueio dinâmico no WAF do IP de origem por 2h e acionamento de desafio reCAPTCHA v3.">
+
+          <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 1rem; flex-wrap: wrap;">
+            <button type="button" class="btn-action" id="btn-copy-task">
+              📋 Copiar Resposta Formatada
+            </button>
+            <span id="copy-feedback" style="font-size: 0.85rem; color: #34d399; font-weight: 600; display: none;">Copiado com sucesso para a área de transferência!</span>
+          </div>
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-header">Pergunta-Guia para Nossa Próxima Aula em Laboratório</div>
+          <p style="font-size: 1.05rem; font-weight: 600; margin-bottom: 0.3rem;">
+            "Se o atacante conhecesse a planta baixa do castelo tão bem quanto você, qual seria a única barreira que ele ainda assim não conseguiria contornar?"
+          </p>
+          <p style="margin-bottom: 0; font-size: 0.9rem; color: var(--text-muted);">
+            Tragam suas anotações e hipóteses para o debate inicial da próxima quinta-feira!
+          </p>
+        </div>
+      </section>
+
+    </article>
+
+    <!-- Footer -->
+    <footer style="margin-top: 5rem; padding-top: 2rem; border-top: 1px solid var(--border); font-size: 0.88rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.75rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <strong>IFC Campus Videira</strong> &bull; Ciência da Computação<br>
+          Disciplina: Segurança em Sistemas &bull; Bloco de Segurança Defensiva
+        </div>
+        <div style="text-align: right;">
+          <span>Material Didático de Apoio ao Estudante</span><br>
+          <span style="font-family: var(--font-mono); font-size: 0.8rem;">Build: Versão 2.4-BlueTeam</span>
+        </div>
+      </div>
+      <div style="text-align: center; margin-top: 1rem; font-size: 0.8rem; color: var(--text-muted);">
+        &copy; Instituto Federal Catarinense — Desenvolvido para fins exclusivamente educacionais e acadêmicos.
+      </div>
+    </footer>
+
+  </main>
+
+  <script>
+    // Reading Progress Indicator Script
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      const progressBar = document.getElementById('progress-bar');
+      if (progressBar) {
+        progressBar.style.width = scrolled + '%';
+      }
+    });
+
+    // Interactive Micro-Task Copy Handler
+    document.addEventListener('DOMContentLoaded', () => {
+      const btnCopy = document.getElementById('btn-copy-task');
+      const feedback = document.getElementById('copy-feedback');
+
+      if (btnCopy) {
+        btnCopy.addEventListener('click', () => {
+          const tech = document.getElementById('technique-input').value.trim();
+          const det = document.getElementById('detection-input').value.trim();
+          const resp = document.getElementById('response-input').value.trim();
+
+          const formattedText = 
+`--- ATIVIDADE DE FIXAÇÃO: SEGURANÇA DEFENSIVA (BLUE) ---
+Disciplina: Segurança em Sistemas - IFC Videira
+1. Técnica Invasora:
+   ${tech}
+
+2. Mecanismo de Detecção (Blue Team):
+   ${det}
+
+3. Resposta e Contenção (Tática / Runbook):
+   ${resp}
+-------------------------------------------------------`;
+
+          navigator.clipboard.writeText(formattedText).then(() => {
+            if (feedback) {
+              feedback.style.display = 'inline';
+              setTimeout(() => {
+                feedback.style.display = 'none';
+              }, 3000);
+            }
+          }).catch(err => {
+            alert('Erro ao copiar para área de transferência. Selecione o texto manualmente.');
+          });
+        });
+      }
+    });
+  </script>
+<script>
+/* Skip artifact shell — fixed helpers served beside every artifact. */
+(function () {
+  "use strict";
+
+  var fmt = {
+    num: function (v, opts) { return new Intl.NumberFormat("pt-BR", opts || {}).format(v); },
+    brl: function (v) { return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v); },
+    pct: function (v) { return new Intl.NumberFormat("pt-BR", { style: "percent", maximumFractionDigits: 1 }).format(v); }
+  };
+
+  // axisFmt keeps axis tick labels short (compact notation) so long values
+  // (e.g. full BRL amounts) never clip against the plot edge.
+  function axisFmt(v) {
+    return fmt.num(v, { notation: "compact", maximumFractionDigits: 1 });
+  }
+
+  // format accepts a function OR one of the fmt names ("num" | "brl" | "pct").
+  function coerceFormat(spec) {
+    if (typeof spec === "function") return spec;
+    if (typeof spec === "string" && fmt[spec]) return fmt[spec];
+    return function (v) { return fmt.num(v); };
+  }
+
+  function accent() {
+    return getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#2563eb";
+  }
+  function mutedColor() {
+    return getComputedStyle(document.documentElement).getPropertyValue("--text-muted").trim() || "#5b6472";
+  }
+  function svgEl(tag, attrs) {
+    var el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for (var k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  }
+  function frame(el, w, h) {
+    var svg = svgEl("svg", { viewBox: "0 0 " + w + " " + h, role: "img" });
+    el.innerHTML = "";
+    el.appendChild(svg);
+    return svg;
+  }
+
+  // maxOf guards the axis scale: empty values would give -Infinity (truthy,
+  // so "|| 1" can't catch it) and a non-positive max would flip the chart.
+  function maxOf(values) {
+    var m = values.length ? Math.max.apply(null, values) : 0;
+    return m > 0 ? m : 1;
+  }
+
+  // bar(el, {labels:[], values:[], color?, format?}) — vertical bar chart.
+  function bar(el, cfg) {
+    var W = 640, H = 280, padL = 46, padB = 30, padT = 12;
+    var svg = frame(el, W, H);
+    var max = maxOf(cfg.values);
+    var n = cfg.values.length;
+    var plotW = W - padL - 12, plotH = H - padT - padB;
+    var step = plotW / n, bw = Math.min(step * 0.62, 64);
+    var color = cfg.color || accent();
+    var f = coerceFormat(cfg.format);
+    for (var g = 0; g <= 4; g++) {
+      var gy = padT + plotH - (plotH * g) / 4;
+      svg.appendChild(svgEl("line", { x1: padL, y1: gy, x2: W - 12, y2: gy, stroke: "currentColor", "stroke-opacity": 0.08 }));
+      var lbl = svgEl("text", { x: padL - 8, y: gy + 4, "text-anchor": "end", "font-size": 10, fill: mutedColor() });
+      lbl.textContent = axisFmt((max * g) / 4);
+      svg.appendChild(lbl);
+    }
+    cfg.values.forEach(function (v, i) {
+      var bh = Math.max(0, (v / max) * plotH);
+      var x = padL + i * step + (step - bw) / 2;
+      var y = padT + plotH - bh;
+      var r = svgEl("rect", { x: x, y: y, width: bw, height: bh, rx: 4, fill: color });
+      var t = svgEl("title", {});
+      t.textContent = cfg.labels[i] + ": " + f(v);
+      r.appendChild(t);
+      svg.appendChild(r);
+      var tx = svgEl("text", { x: x + bw / 2, y: H - 10, "text-anchor": "middle", "font-size": 11, fill: mutedColor() });
+      tx.textContent = cfg.labels[i];
+      svg.appendChild(tx);
+    });
+  }
+
+  // line(el, {labels:[], values:[], color?, format?}) — single-series line.
+  function line(el, cfg) {
+    var W = 640, H = 280, padL = 46, padB = 30, padT = 12;
+    var svg = frame(el, W, H);
+    var max = maxOf(cfg.values);
+    var n = cfg.values.length;
+    var plotW = W - padL - 16, plotH = H - padT - padB;
+    var color = cfg.color || accent();
+    var f = coerceFormat(cfg.format);
+    for (var g = 0; g <= 4; g++) {
+      var gy = padT + plotH - (plotH * g) / 4;
+      svg.appendChild(svgEl("line", { x1: padL, y1: gy, x2: W - 16, y2: gy, stroke: "currentColor", "stroke-opacity": 0.08 }));
+      var lbl = svgEl("text", { x: padL - 8, y: gy + 4, "text-anchor": "end", "font-size": 10, fill: mutedColor() });
+      lbl.textContent = axisFmt((max * g) / 4);
+      svg.appendChild(lbl);
+    }
+    var pts = cfg.values.map(function (v, i) {
+      var x = padL + (n === 1 ? plotW / 2 : (plotW * i) / (n - 1));
+      var y = padT + plotH - (v / max) * plotH;
+      return [x, y];
+    });
+    var d = pts.map(function (p, i) { return (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); }).join(" ");
+    svg.appendChild(svgEl("path", { d: d, fill: "none", stroke: color, "stroke-width": 2, "stroke-linejoin": "round" }));
+    pts.forEach(function (p, i) {
+      var c = svgEl("circle", { cx: p[0], cy: p[1], r: 3.5, fill: color });
+      var t = svgEl("title", {});
+      t.textContent = cfg.labels[i] + ": " + f(cfg.values[i]);
+      c.appendChild(t);
+      svg.appendChild(c);
+      var tx = svgEl("text", { x: p[0], y: H - 10, "text-anchor": "middle", "font-size": 11, fill: mutedColor() });
+      tx.textContent = cfg.labels[i];
+      svg.appendChild(tx);
+    });
+  }
+
+  // donut(el, {labels:[], values:[], colors?}) — donut with center total.
+  function donut(el, cfg) {
+    var W = 320, H = 280, cx = W / 2, cy = H / 2, R = 92, r = 58;
+    var svg = frame(el, W, H);
+    var total = cfg.values.reduce(function (a, b) { return a + b; }, 0) || 1;
+    var palette = cfg.colors || [accent(), "#1baf7a", "#eda100", "#e34948", "#4a3aa7", "#e87ba4"];
+    var a0 = -Math.PI / 2;
+    cfg.values.forEach(function (v, i) {
+      var a1 = a0 + (v / total) * Math.PI * 2;
+      var large = a1 - a0 > Math.PI ? 1 : 0;
+      var p = ["M", cx + R * Math.cos(a0), cy + R * Math.sin(a0),
+        "A", R, R, 0, large, 1, cx + R * Math.cos(a1), cy + R * Math.sin(a1),
+        "L", cx + r * Math.cos(a1), cy + r * Math.sin(a1),
+        "A", r, r, 0, large, 0, cx + r * Math.cos(a0), cy + r * Math.sin(a0), "Z"].join(" ");
+      var path = svgEl("path", { d: p, fill: palette[i % palette.length] });
+      var t = svgEl("title", {});
+      t.textContent = cfg.labels[i] + ": " + fmt.num(v) + " (" + fmt.pct(v / total) + ")";
+      path.appendChild(t);
+      svg.appendChild(path);
+      a0 = a1;
+    });
+    var center = svgEl("text", { x: cx, y: cy + 5, "text-anchor": "middle", "font-size": 20, "font-weight": 650, fill: "currentColor" });
+    center.textContent = fmt.num(total);
+    svg.appendChild(center);
+  }
+
+  window.skipShell = { fmt: fmt };
+  window.skipChart = { bar: bar, line: line, donut: donut };
+})();
+
+</script>
+</body>
+</html>
